@@ -1146,9 +1146,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ee68d1a82cf8542ae158a0ee5cef52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileDisplayerPrefabHorizontal: {fileID: 0}
-  tileDisplayerPrefabVertical: {fileID: 0}
-  numberOfTiles: {x: 2, y: 2}
+  tileDisplayerPrefabHorizontal: {fileID: 2539671055868718955, guid: 64feed81737d63244a35503b433eb032, type: 3}
+  tileDisplayerPrefabVertical: {fileID: 2539671055868718955, guid: 93a3c7f6cc3340d4dbdbfb0734d0f184, type: 3}
+  selectionDatas:
+  - tileVariant: {fileID: 11400000, guid: e7f2eaf0bcaf79044bb0ade236bdb7e7, type: 2}
+    chance: 0.2
+  - tileVariant: {fileID: 11400000, guid: d57d90242ad9b9e4197b3da80aa88a69, type: 2}
+    chance: 0.2
+  - tileVariant: {fileID: 11400000, guid: a030484c86acfb54f80deab2150e2726, type: 2}
+    chance: 0.2
+  - tileVariant: {fileID: 11400000, guid: 7f1f28da9008b8144ae126721ac02eb7, type: 2}
+    chance: 0.2
+  numberOfTiles: {x: 3, y: 3}
   leftColumn: {fileID: 1090741662}
   rightColumn: {fileID: 1370185603}
   bottomRow: {fileID: 1795636392}

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TilePlacer : MonoBehaviour
 {
@@ -14,36 +15,74 @@ public class TilePlacer : MonoBehaviour
     [SerializeField] private Transform bottomRow;
     [SerializeField] private Transform topRow;
 
+    [SerializeField] private TileVariantSelectionData[] selectionDatas;
+
     [ContextMenu("Place tiles")]
     public void PlaceTiles()
     {
+        NormalizeTileChances();
         for (int i = 0; i < numberOfTiles.y; i++)
         {
-            Instantiate(tileDisplayerPrefabVertical, leftColumn);
+            Instantiate(tileDisplayerPrefabVertical, leftColumn)
+                .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.y; i++)
         {
-            Instantiate(tileDisplayerPrefabVertical, rightColumn);
+            Instantiate(tileDisplayerPrefabVertical, rightColumn)
+                .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.x; i++)
         {
-            Instantiate(tileDisplayerPrefabHorizontal, bottomRow);
+            Instantiate(tileDisplayerPrefabHorizontal, bottomRow)
+                .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.x; i++)
         {
-            Instantiate(tileDisplayerPrefabHorizontal, topRow);
+            Instantiate(tileDisplayerPrefabHorizontal, topRow)
+                .Display(SelectRandomTileVariant());
+        }
+    }
+
+    private TileVariant SelectRandomTileVariant()
+    {
+        var roll = Random.value;
+        int i = 0;
+        while (true)
+        {
+            roll -= selectionDatas[i].chance;
+            if (roll >= 0 || i > 100) i++;
+            else break;
+
+            i %= selectionDatas.Length;
+        }
+
+        return selectionDatas[i].tileVariant;
+    }
+
+    private void NormalizeTileChances()
+    {
+        var sum = 0f;
+        foreach (var data in selectionDatas)
+        {
+            sum += data.chance;
+        }
+
+        foreach (var data in selectionDatas)
+        {
+            data.chance /= sum;
         }
     }
 }
 
 
 [Serializable]
-public class TileData
+public class TileVariantSelectionData
 {
-    public Guid id;
-    public Sprite icon;
-    public string displayName;
+    public TileVariant tileVariant;
+
+    public float chance;
+    // public bool used;
 }
