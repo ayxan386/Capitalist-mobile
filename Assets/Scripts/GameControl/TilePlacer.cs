@@ -32,37 +32,10 @@ public class TilePlacer : MonoBehaviour
         Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2];
         var k = 0;
 
-        for (int i = 0; i < numberOfTiles.y; i++)
-        {
-            var tileDisplayer = Instantiate(tileDisplayerPrefabVertical, leftColumn);
-            Tiles[k++] = tileDisplayer;
-            tileDisplayer
-                .Display(SelectRandomTileVariant());
-        }
-
-        for (int i = 0; i < numberOfTiles.y; i++)
-        {
-            var tileDisplayer = Instantiate(tileDisplayerPrefabVertical, rightColumn);
-            Tiles[k++] = tileDisplayer;
-            tileDisplayer
-                .Display(SelectRandomTileVariant());
-        }
-
-        for (int i = 0; i < numberOfTiles.x; i++)
-        {
-            var tileDisplayer = Instantiate(tileDisplayerPrefabHorizontal, bottomRow);
-            Tiles[k++] = tileDisplayer;
-            tileDisplayer
-                .Display(SelectRandomTileVariant());
-        }
-
-        for (int i = 0; i < numberOfTiles.x; i++)
-        {
-            var tileDisplayer = Instantiate(tileDisplayerPrefabHorizontal, topRow);
-            Tiles[k++] = tileDisplayer;
-            tileDisplayer
-                .Display(SelectRandomTileVariant());
-        }
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn);
+        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow);
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn);
+        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow);
     }
 
     private TileVariant SelectRandomTileVariant()
@@ -93,6 +66,20 @@ public class TilePlacer : MonoBehaviour
         {
             data.chance /= sum;
         }
+    }
+
+
+    private int GenerateTileForSection(int k, int count, TileDisplayer prefab, Transform holder)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            var tileDisplayer = Instantiate(prefab, holder);
+            Tiles[k++] = tileDisplayer;
+            tileDisplayer
+                .Display(SelectRandomTileVariant());
+        }
+
+        return k;
     }
 }
 
