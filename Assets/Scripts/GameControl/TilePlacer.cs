@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TilePlacer : MonoBehaviour
 {
@@ -13,37 +14,95 @@ public class TilePlacer : MonoBehaviour
     [SerializeField] private Transform rightColumn;
     [SerializeField] private Transform bottomRow;
     [SerializeField] private Transform topRow;
+    [SerializeField] private Transform[] corners;
+    [SerializeField] private TileVariant[] cornerTiles;
+
+    [SerializeField] private TileVariantSelectionData[] selectionDatas;
+
+    public TileDisplayer[] Tiles { get; private set; }
+    public static TilePlacer Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     [ContextMenu("Place tiles")]
     public void PlaceTiles()
     {
-        for (int i = 0; i < numberOfTiles.y; i++)
+        NormalizeTileChances();
+        Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2 + 4];
+        var k = 0;
+
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[0], cornerTiles[0]);
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[1], cornerTiles[1]);
+        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[2], cornerTiles[2]);
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[3], cornerTiles[3]);
+        GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow, null);
+    }
+
+    private TileVariant SelectRandomTileVariant()
+    {
+        var roll = Random.value;
+        int i = 0;
+        while (true)
         {
-            Instantiate(tileDisplayerPrefabVertical, leftColumn);
+            roll -= selectionDatas[i].chance;
+            if (roll >= 0 || i > 100) i++;
+            else break;
+
+            i %= selectionDatas.Length;
         }
 
-        for (int i = 0; i < numberOfTiles.y; i++)
+        return selectionDatas[i].tileVariant;
+    }
+
+    private void NormalizeTileChances()
+    {
+        var sum = 0f;
+        foreach (var data in selectionDatas)
         {
-            Instantiate(tileDisplayerPrefabVertical, rightColumn);
+            sum += data.chance;
         }
 
-        for (int i = 0; i < numberOfTiles.x; i++)
+        foreach (var data in selectionDatas)
         {
-            Instantiate(tileDisplayerPrefabHorizontal, bottomRow);
+            data.chance /= sum;
+        }
+    }
+
+
+    private int GenerateTileForSection(int k, int count, TileDisplayer prefab, Transform holder,
+        TileVariant tileVariant)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            var tileDisplayer = Instantiate(prefab, holder);
+            Tiles[k++] = tileDisplayer;
+
+            if (tileVariant == null)
+            {
+                tileDisplayer.Display(SelectRandomTileVariant());
+            }
+            else
+            {
+                tileDisplayer.Display(tileVariant);
+            }
         }
 
-        for (int i = 0; i < numberOfTiles.x; i++)
-        {
-            Instantiate(tileDisplayerPrefabHorizontal, topRow);
-        }
+        return k;
     }
 }
 
 
 [Serializable]
-public class TileData
+public class TileVariantSelectionData
 {
-    public Guid id;
-    public Sprite icon;
-    public string displayName;
+    public TileVariant tileVariant;
+
+    public float chance;
+    // public bool used;
 }

@@ -1,18 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
-public class TileVariant : MonoBehaviour
+[CreateAssetMenu(fileName = "TileVariant", menuName = "ScriptableObjects/TileVariant", order = 1)]
+public class TileVariant : ScriptableObject
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public string displayName;
+    public Sprite icon;
+    public Color spriteColor;
+    public int cost;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

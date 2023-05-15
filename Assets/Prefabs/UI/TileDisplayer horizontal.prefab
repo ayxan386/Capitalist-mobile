@@ -110,12 +110,13 @@ RectTransform:
   m_Children:
   - {fileID: 2539671056174340747}
   - {fileID: 2539671055439401699}
+  - {fileID: 582362527642368595}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50.0703, y: -30.534416}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 240, y: 220}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2539671055868718952
@@ -168,6 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 724b1e227c2a8b44e8814d513afff5ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerLocation: {fileID: 582362527642368595}
   icon: {fileID: 2539671056174340746}
   displayName: {fileID: 2539671057177954214}
 --- !u!1 &2539671056174340744
@@ -381,3 +383,39 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &2700374050292180898
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 582362527642368595}
+  m_Layer: 5
+  m_Name: PlayerLocation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &582362527642368595
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2700374050292180898}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2539671055868718958}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0.8931, y: 10.7177}
+  m_SizeDelta: {x: 101.7863, y: 78.5647}
+  m_Pivot: {x: 0.5, y: 0.5}
