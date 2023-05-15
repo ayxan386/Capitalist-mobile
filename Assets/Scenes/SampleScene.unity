@@ -1231,6 +1231,16 @@ MonoBehaviour:
   rightColumn: {fileID: 1370185603}
   bottomRow: {fileID: 1795636392}
   topRow: {fileID: 88503520}
+  corners:
+  - {fileID: 138616184}
+  - {fileID: 684172852}
+  - {fileID: 892671477}
+  - {fileID: 669970819}
+  cornerTiles:
+  - {fileID: 11400000, guid: 305cccd57c87477478c61a44532c7777, type: 2}
+  - {fileID: 11400000, guid: 305cccd57c87477478c61a44532c7777, type: 2}
+  - {fileID: 11400000, guid: 305cccd57c87477478c61a44532c7777, type: 2}
+  - {fileID: 11400000, guid: 305cccd57c87477478c61a44532c7777, type: 2}
   selectionDatas:
   - tileVariant: {fileID: 11400000, guid: e7f2eaf0bcaf79044bb0ade236bdb7e7, type: 2}
     chance: 0.2

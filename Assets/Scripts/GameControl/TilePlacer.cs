@@ -14,6 +14,8 @@ public class TilePlacer : MonoBehaviour
     [SerializeField] private Transform rightColumn;
     [SerializeField] private Transform bottomRow;
     [SerializeField] private Transform topRow;
+    [SerializeField] private Transform[] corners;
+    [SerializeField] private TileVariant[] cornerTiles;
 
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
 
@@ -29,13 +31,17 @@ public class TilePlacer : MonoBehaviour
     public void PlaceTiles()
     {
         NormalizeTileChances();
-        Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2];
+        Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2 + 4];
         var k = 0;
 
-        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn);
-        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow);
-        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn);
-        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[0], cornerTiles[0]);
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[1], cornerTiles[1]);
+        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[2], cornerTiles[2]);
+        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn, null);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[3], cornerTiles[3]);
+        GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow, null);
     }
 
     private TileVariant SelectRandomTileVariant()
@@ -69,14 +75,22 @@ public class TilePlacer : MonoBehaviour
     }
 
 
-    private int GenerateTileForSection(int k, int count, TileDisplayer prefab, Transform holder)
+    private int GenerateTileForSection(int k, int count, TileDisplayer prefab, Transform holder,
+        TileVariant tileVariant)
     {
         for (int i = 0; i < count; i++)
         {
             var tileDisplayer = Instantiate(prefab, holder);
             Tiles[k++] = tileDisplayer;
-            tileDisplayer
-                .Display(SelectRandomTileVariant());
+
+            if (tileVariant == null)
+            {
+                tileDisplayer.Display(SelectRandomTileVariant());
+            }
+            else
+            {
+                tileDisplayer.Display(tileVariant);
+            }
         }
 
         return k;
