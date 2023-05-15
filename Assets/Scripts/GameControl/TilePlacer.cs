@@ -17,31 +17,50 @@ public class TilePlacer : MonoBehaviour
 
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
 
+    public TileDisplayer[] Tiles { get; private set; }
+    public static TilePlacer Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     [ContextMenu("Place tiles")]
     public void PlaceTiles()
     {
         NormalizeTileChances();
+        Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2];
+        var k = 0;
+
         for (int i = 0; i < numberOfTiles.y; i++)
         {
-            Instantiate(tileDisplayerPrefabVertical, leftColumn)
+            var tileDisplayer = Instantiate(tileDisplayerPrefabVertical, leftColumn);
+            Tiles[k++] = tileDisplayer;
+            tileDisplayer
                 .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.y; i++)
         {
-            Instantiate(tileDisplayerPrefabVertical, rightColumn)
+            var tileDisplayer = Instantiate(tileDisplayerPrefabVertical, rightColumn);
+            Tiles[k++] = tileDisplayer;
+            tileDisplayer
                 .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.x; i++)
         {
-            Instantiate(tileDisplayerPrefabHorizontal, bottomRow)
+            var tileDisplayer = Instantiate(tileDisplayerPrefabHorizontal, bottomRow);
+            Tiles[k++] = tileDisplayer;
+            tileDisplayer
                 .Display(SelectRandomTileVariant());
         }
 
         for (int i = 0; i < numberOfTiles.x; i++)
         {
-            Instantiate(tileDisplayerPrefabHorizontal, topRow)
+            var tileDisplayer = Instantiate(tileDisplayerPrefabHorizontal, topRow);
+            Tiles[k++] = tileDisplayer;
+            tileDisplayer
                 .Display(SelectRandomTileVariant());
         }
     }
