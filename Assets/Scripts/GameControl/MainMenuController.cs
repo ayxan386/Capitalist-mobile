@@ -1,4 +1,3 @@
-using GameControl;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,8 +8,14 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGame()
     {
-        PlayerPrefs.SetInt(GlobalConstants.NumberOfPlayersKey, int.Parse(numberOfPlayers.text));
+        // PlayerPrefs.SetInt(GlobalConstants.NumberOfPlayersKey, int.Parse(numberOfPlayers.text));
+        NetworkLayer.Instance.JoinGame(numberOfPlayers.text);
+        // SceneManager.LoadScene("SampleScene");
+    }
 
-        SceneManager.LoadScene("SampleScene");
+    public void HostGame()
+    {
+        NetworkLayer.Instance.StartHost();
+        // SceneManager.LoadScene("SampleScene");
     }
 }

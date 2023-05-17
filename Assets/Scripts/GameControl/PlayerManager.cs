@@ -13,7 +13,6 @@ namespace GameControl
             TilePlacer.Instance.Tiles[currentPos].PlacePlayer(player);
         }
 
-
         private void Update()
         {
             if (Input.GetKeyUp(KeyCode.Space))

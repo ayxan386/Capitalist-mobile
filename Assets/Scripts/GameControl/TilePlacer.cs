@@ -22,6 +22,8 @@ public class TilePlacer : MonoBehaviour
     public TileDisplayer[] Tiles { get; private set; }
     public static TilePlacer Instance { get; private set; }
 
+    public static Action<bool> OnTileInitializeComplete;
+
     private void Awake()
     {
         Instance = this;
@@ -42,6 +44,8 @@ public class TilePlacer : MonoBehaviour
         k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn, null);
         k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[3], cornerTiles[3]);
         GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow, null);
+        
+        OnTileInitializeComplete?.Invoke(true);
     }
 
     private TileVariant SelectRandomTileVariant()
