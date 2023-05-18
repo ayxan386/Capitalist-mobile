@@ -15,8 +15,8 @@ public class TileDisplayer : MonoBehaviour
         displayName.text = data.displayName;
     }
 
-    public void PlacePlayer(RectTransform player)
+    public void PlacePlayer(Player player)
     {
-        player.position = playerLocation.position;
+        player.DisplayEnt.position = playerLocation.position;
     }
 }

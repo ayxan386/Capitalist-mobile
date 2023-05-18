@@ -6,6 +6,7 @@ public class TilePlacer : MonoBehaviour
 {
     [SerializeField] private TileDisplayer tileDisplayerPrefabHorizontal;
     [SerializeField] private TileDisplayer tileDisplayerPrefabVertical;
+    [SerializeField] private TileDisplayer tileDisplayerPrefabCorner;
     [SerializeField] private Vector2Int numberOfTiles;
 
     [Header("Tile holders")] [SerializeField]
@@ -36,16 +37,22 @@ public class TilePlacer : MonoBehaviour
         Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2 + 4];
         var k = 0;
 
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[0], cornerTiles[0]);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[0], cornerTiles[0]);
         k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[1], cornerTiles[1]);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[1], cornerTiles[1]);
         k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[2], cornerTiles[2]);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[2], cornerTiles[2]);
         k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabVertical, corners[3], cornerTiles[3]);
+        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[3], cornerTiles[3]);
         GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow, null);
-        
+
         OnTileInitializeComplete?.Invoke(true);
+    }
+
+
+    private void Start()
+    {
+        PlaceTiles();
     }
 
     private TileVariant SelectRandomTileVariant()
@@ -98,6 +105,11 @@ public class TilePlacer : MonoBehaviour
         }
 
         return k;
+    }
+
+    public int CalculatePosition(int pos, int dist)
+    {
+        return (pos + dist) % Tiles.Length;
     }
 }
 
