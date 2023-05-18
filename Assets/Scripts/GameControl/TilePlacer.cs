@@ -23,36 +23,68 @@ public class TilePlacer : MonoBehaviour
     public TileDisplayer[] Tiles { get; private set; }
     public static TilePlacer Instance { get; private set; }
 
-    public static Action<bool> OnTileInitializeComplete;
+    public static bool IsInitializeComplete { get; private set; }
 
     private void Awake()
     {
         Instance = this;
     }
 
-    [ContextMenu("Place tiles")]
-    public void PlaceTiles()
+    public void PlaceTiles(TileVariant[] data)
     {
-        NormalizeTileChances();
-        Tiles = new TileDisplayer[numberOfTiles.y * 2 + numberOfTiles.x * 2 + 4];
-        var k = 0;
+        if (Tiles != null) return;
+        ;
+        var totalCount = CalculateTotalCount();
+        Tiles = new TileDisplayer[totalCount];
+        for (int i = 0; i < data.Length; i++)
+        {
+            var holder = FindHolder(i);
+            Tiles[i] = Instantiate(FindPrefab(holder), holder);
+            Tiles[i].Display(data[i]);
+        }
 
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[0], cornerTiles[0]);
-        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, leftColumn, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[1], cornerTiles[1]);
-        k = GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, topRow, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[2], cornerTiles[2]);
-        k = GenerateTileForSection(k, numberOfTiles.y, tileDisplayerPrefabVertical, rightColumn, null);
-        k = GenerateTileForSection(k, 1, tileDisplayerPrefabCorner, corners[3], cornerTiles[3]);
-        GenerateTileForSection(k, numberOfTiles.x, tileDisplayerPrefabHorizontal, bottomRow, null);
-
-        OnTileInitializeComplete?.Invoke(true);
+        IsInitializeComplete = true;
+        print("Board tiles placed");
     }
 
-
-    private void Start()
+    private Transform FindHolder(int i)
     {
-        PlaceTiles();
+        if (i > 0 && i <= numberOfTiles.y)
+        {
+            return leftColumn;
+        }
+
+        if (i > numberOfTiles.y * 2 + 2 &&
+            i <= numberOfTiles.y * 3 + 2)
+        {
+            return rightColumn;
+        }
+
+        if (i > numberOfTiles.y + 1 && i <= numberOfTiles.y * 2 + 1)
+        {
+            return topRow;
+        }
+
+        if (i > numberOfTiles.y * 3 + 3 && i < CalculateTotalCount())
+        {
+            return bottomRow;
+        }
+
+        return corners[i / (numberOfTiles.y + 1)];
+    }
+
+    private TileDisplayer FindPrefab(Transform i)
+    {
+        if (i == leftColumn || i == rightColumn) return tileDisplayerPrefabVertical;
+
+        if (i == bottomRow || i == topRow) return tileDisplayerPrefabHorizontal;
+
+        return tileDisplayerPrefabCorner;
+    }
+
+    private int CalculateTotalCount()
+    {
+        return numberOfTiles.x * 2 + numberOfTiles.y * 2 + 4;
     }
 
     private TileVariant SelectRandomTileVariant()
@@ -85,22 +117,17 @@ public class TilePlacer : MonoBehaviour
         }
     }
 
-
-    private int GenerateTileForSection(int k, int count, TileDisplayer prefab, Transform holder,
-        TileVariant tileVariant)
+    private int GenerateTileVariantForSection(int k, int count, TileVariant tileVariant, TileVariant[] res)
     {
         for (int i = 0; i < count; i++)
         {
-            var tileDisplayer = Instantiate(prefab, holder);
-            Tiles[k++] = tileDisplayer;
-
             if (tileVariant == null)
             {
-                tileDisplayer.Display(SelectRandomTileVariant());
+                res[k++] = SelectRandomTileVariant();
             }
             else
             {
-                tileDisplayer.Display(tileVariant);
+                res[k++] = tileVariant;
             }
         }
 
@@ -110,6 +137,22 @@ public class TilePlacer : MonoBehaviour
     public int CalculatePosition(int pos, int dist)
     {
         return (pos + dist) % Tiles.Length;
+    }
+
+    public TileVariant[] GenerateBoardData()
+    {
+        NormalizeTileChances();
+        var res = new TileVariant[CalculateTotalCount()];
+        int k = 0;
+        k = GenerateTileVariantForSection(k, 1, cornerTiles[0], res);
+        k = GenerateTileVariantForSection(k, numberOfTiles.y, null, res);
+        k = GenerateTileVariantForSection(k, 1, cornerTiles[1], res);
+        k = GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+        k = GenerateTileVariantForSection(k, 1, cornerTiles[2], res);
+        k = GenerateTileVariantForSection(k, numberOfTiles.y, null, res);
+        k = GenerateTileVariantForSection(k, 1, cornerTiles[3], res);
+        k = GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+        return res;
     }
 }
 
