@@ -1,33 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using GameControl.helpers;
 using Mirror;
 using TMPro;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace GameControl
 {
     public class PlayerManager : NetworkBehaviour
     {
-        [SerializeField] private TextMeshProUGUI totalNumberDisplay;
+        [Header("waiting menu")] [SerializeField]
+        private TextMeshProUGUI totalNumberDisplay;
+
         [SerializeField] private GameObject confirmationMenu;
-        private List<Player> players = new();
+        [SerializeField] private GameObject onGoingGameMenu;
+
+        [Header("Indicators")] [SerializeField]
+        private TextMeshProUGUI turnIndicatorText;
+
+        private Dictionary<uint, Player> players = new();
         private int totalNumberOfReadyPlayers;
+
+        [SyncVar(hook = nameof(OnTurnChanged))]
         private uint currentPlayersTurn;
 
         public static bool IsGameStarted { get; private set; }
-        public static event Action<uint> OnTurnChange;
+        public static PlayerManager Instance { get; private set; }
+
+        public Player CurrentPlayer => players[currentPlayersTurn];
+
+        private Player prevPlayer;
+        private Player firstPlayer;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         private void Start()
         {
             Player.OnPlayerSpawned += OnPlayerSpawned;
             Player.OnPlayerPositionChanged += OnPlayerPositionChanged;
-            Player.OnPlayerPlayed += OnPlayerPlayed;
         }
 
-        private void OnPlayerPlayed(Player obj)
+        private void OnTurnChanged(uint prevPlayerId, uint nextPlayerId)
         {
-            PlayerPlayedTurn(obj.netId);
+            currentPlayersTurn = nextPlayerId;
+            var player = players[nextPlayerId];
+            print("is player owned: " + player.isOwned);
+            DiceRollHelper.Instance.CanRoll = player.isOwned;
+            turnIndicatorText.text = $"Player {player.netId} turn";
         }
 
         public void OnPlayerReady()
@@ -41,8 +63,10 @@ namespace GameControl
             totalNumberOfReadyPlayers++;
             if (totalNumberOfReadyPlayers == NetworkManager.singleton.numPlayers)
             {
-                var firstPlayer = players[Random.Range(0, totalNumberOfReadyPlayers)];
-                RpcStartGame(firstPlayer.netId);
+                var firstPlayer = players.Values.ElementAt(Random.Range(0, totalNumberOfReadyPlayers));
+                prevPlayer.NextPlayer = this.firstPlayer;
+                currentPlayersTurn = firstPlayer.netId;
+                RpcStartGame();
             }
             else
             {
@@ -51,12 +75,11 @@ namespace GameControl
         }
 
         [ClientRpc]
-        private void RpcStartGame(uint firstPlayer)
+        private void RpcStartGame()
         {
             print("All ready, start");
-            currentPlayersTurn = firstPlayer;
-            OnTurnChange?.Invoke(currentPlayersTurn);
             confirmationMenu.SetActive(false);
+            onGoingGameMenu.SetActive(true);
             IsGameStarted = true;
         }
 
@@ -67,7 +90,11 @@ namespace GameControl
 
         private void OnPlayerSpawned(Player obj)
         {
-            players.Add(obj);
+            players.Add(obj.netId, obj);
+            firstPlayer ??= obj;
+            prevPlayer ??= obj;
+            prevPlayer.NextPlayer = obj;
+            prevPlayer = obj;
             PlacePlayer(obj);
         }
 
@@ -81,22 +108,23 @@ namespace GameControl
         {
             totalNumberDisplay.text = newTotal + " players ready";
         }
-        
-        [ClientRpc]
-        public void RpcPlayerTurnChanged(uint newPlayer)
+
+        public void EndPlayerTurn()
         {
-            OnTurnChange?.Invoke(newPlayer);
+            if(CurrentPlayer.isOwned)
+                CmdPlayerPlayedTurn(currentPlayersTurn);
         }
 
-        private void PlayerPlayedTurn(uint playerId)
+        [Command(requiresAuthority = false)]
+        private void CmdPlayerPlayedTurn(uint playerId)
         {
-            for (int i = 0; i < players.Count; i++)
+            if (playerId != currentPlayersTurn) return;
+            currentPlayersTurn = CurrentPlayer.NextPlayer.netId;
+
+            if (players.Count == 1)
             {
-                if (players[i].netId == playerId)
-                {
-                    RpcPlayerTurnChanged(players[(i + 1) % players.Count].netId); 
-                }
+                OnTurnChanged(currentPlayersTurn, currentPlayersTurn);
             }
-        } 
+        }
     }
 }

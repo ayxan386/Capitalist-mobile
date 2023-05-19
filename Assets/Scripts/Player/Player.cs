@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using GameControl;
 using Mirror;
+using TMPro;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -16,13 +17,11 @@ public class Player : NetworkBehaviour
     public int Position => position;
     public string DisplayName => displayName;
     public RectTransform DisplayEnt { get; private set; }
+    public Player NextPlayer { get; set; }
 
     public static Action<Player> OnPlayerSpawned;
     private static TileVariant[] boardData;
-    private bool myTurn;
     public static event Action<Player> OnPlayerPositionChanged;
-    public static event Action<Player> OnPlayerReady;
-    public static event Action<Player> OnPlayerPlayed;
 
     public override void OnStartLocalPlayer()
     {
@@ -43,13 +42,6 @@ public class Player : NetworkBehaviour
         StartCoroutine(WaitForBoardThenPlace());
     }
 
-    private void OnTurnChange(uint playerId)
-    {
-        myTurn = playerId == netId;
-        
-        print("Player " + playerId + " turn");
-    }
-
     private IEnumerator WaitForBoardThenPlace()
     {
         yield return new WaitUntil(() => TilePlacer.IsInitializeComplete);
@@ -57,8 +49,6 @@ public class Player : NetworkBehaviour
         var holder = GameObject.Find("Players");
         DisplayEnt = Instantiate(playerDisplay, holder.transform);
         OnPlayerSpawned?.Invoke(this);
-        
-        PlayerManager.OnTurnChange += OnTurnChange;
     }
 
     [ClientRpc]
@@ -67,27 +57,14 @@ public class Player : NetworkBehaviour
         TilePlacer.Instance.PlaceTiles(boardData);
     }
 
-    private void Update()
-    {
-        if (!isLocalPlayer || !PlayerManager.IsGameStarted) return;
-        
-        if(!myTurn) return;
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            CmdUpdatePosition(TilePlacer.Instance.CalculatePosition(Position, 1));
-        }
-    }
-
     private void OnPositionChanged(int old, int current)
     {
         OnPlayerPositionChanged?.Invoke(this);
     }
 
     [Command]
-    private void CmdUpdatePosition(int newPos)
+    public void CmdUpdatePosition(int newPos)
     {
         position = newPos;
-        OnPlayerPlayed?.Invoke(this);
     }
 }
