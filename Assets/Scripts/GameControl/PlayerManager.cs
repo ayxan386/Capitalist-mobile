@@ -12,6 +12,8 @@ namespace GameControl
         [Header("waiting menu")] [SerializeField]
         private TextMeshProUGUI totalNumberDisplay;
 
+        [SerializeField] private TMP_InputField nameInput;
+
         [SerializeField] private GameObject confirmationMenu;
         [SerializeField] private GameObject onGoingGameMenu;
 
@@ -45,15 +47,25 @@ namespace GameControl
 
         private void OnTurnChanged(uint prevPlayerId, uint nextPlayerId)
         {
+            CurrentPlayer.UpdateInfo();
             currentPlayersTurn = nextPlayerId;
             var player = players[nextPlayerId];
             print("is player owned: " + player.isOwned);
             DiceRollHelper.Instance.CanRoll = player.isOwned;
-            turnIndicatorText.text = $"Player {player.netId} turn";
+            turnIndicatorText.text = $"Player {player.DisplayName} turn";
         }
 
         public void OnPlayerReady()
         {
+            foreach (var player in players.Values)
+            {
+                if (player.isOwned)
+                {
+                    player.CmdUpdateDisplayName(nameInput.text);
+                    break;
+                }
+            }
+
             CmdSetPlayerReady();
         }
 
@@ -111,7 +123,7 @@ namespace GameControl
 
         public void EndPlayerTurn()
         {
-            if(CurrentPlayer.isOwned)
+            if (CurrentPlayer.isOwned)
                 CmdPlayerPlayedTurn(currentPlayersTurn);
         }
 

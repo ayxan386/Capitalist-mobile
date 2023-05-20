@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using GameControl;
 using Mirror;
-using TMPro;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
     [SerializeField] private RectTransform playerDisplay;
+    [SerializeField] private PlayerInfoDisplayer infoDisplayPrefab;
+    private PlayerInfoDisplayer infoDisplay;
 
     [SyncVar(hook = nameof(OnPositionChanged))]
     private int position;
@@ -26,7 +26,6 @@ public class Player : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         position = 0;
-        displayName = Guid.NewGuid().ToString();
     }
 
     public override void OnStartClient()
@@ -48,6 +47,16 @@ public class Player : NetworkBehaviour
 
         var holder = GameObject.Find("Players");
         DisplayEnt = Instantiate(playerDisplay, holder.transform);
+        if (isOwned)
+        {
+            infoDisplay = GameObject.Find("PlayerSelfDisplay").GetComponent<PlayerInfoDisplayer>();
+        }
+        else
+        {
+            var otherPlayers = GameObject.Find("OtherPlayers");
+            infoDisplay = Instantiate(infoDisplayPrefab, otherPlayers.transform);
+        }
+
         OnPlayerSpawned?.Invoke(this);
     }
 
@@ -66,5 +75,16 @@ public class Player : NetworkBehaviour
     public void CmdUpdatePosition(int newPos)
     {
         position = newPos;
+    }
+
+    [Command]
+    public void CmdUpdateDisplayName(string newName)
+    {
+        displayName = newName;
+    }
+
+    public void UpdateInfo()
+    {
+        infoDisplay.Display(this);
     }
 }
