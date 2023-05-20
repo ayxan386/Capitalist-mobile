@@ -77,7 +77,6 @@ public class Player : NetworkBehaviour
         position = newPos;
     }
 
-    [Command]
     public void CmdUpdateDisplayName(string newName)
     {
         displayName = newName;

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GameControl.helpers;
 using Mirror;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace GameControl
 {
@@ -57,22 +59,16 @@ namespace GameControl
 
         public void OnPlayerReady()
         {
-            foreach (var player in players.Values)
-            {
-                if (player.isOwned)
-                {
-                    player.CmdUpdateDisplayName(nameInput.text);
-                    break;
-                }
-            }
-
-            CmdSetPlayerReady();
+            var ownedPlayer = FindOwnedPlayer();
+            CmdSetPlayerReady(nameInput.text, ownedPlayer);
         }
 
         [Command(requiresAuthority = false)]
-        private void CmdSetPlayerReady()
+        private void CmdSetPlayerReady(string displayName, uint ownedPlayer)
         {
             totalNumberOfReadyPlayers++;
+            players[ownedPlayer].CmdUpdateDisplayName(displayName);
+            players[ownedPlayer].UpdateInfo();
             if (totalNumberOfReadyPlayers == NetworkManager.singleton.numPlayers)
             {
                 var firstPlayer = players.Values.ElementAt(Random.Range(0, totalNumberOfReadyPlayers));
@@ -84,6 +80,16 @@ namespace GameControl
             {
                 RpcPlayerReadyCountChange(totalNumberOfReadyPlayers);
             }
+        }
+
+        private uint FindOwnedPlayer()
+        {
+            foreach (var player in players.Values.Where(player => player.isOwned))
+            {
+                return player.netId;
+            }
+
+            throw new ArgumentException("No players found");
         }
 
         [ClientRpc]
