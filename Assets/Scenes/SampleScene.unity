@@ -4149,6 +4149,10 @@ MonoBehaviour:
     chance: 0.2
   - tileVariant: {fileID: 11400000, guid: 7f1f28da9008b8144ae126721ac02eb7, type: 2}
     chance: 0.2
+  - tileVariant: {fileID: 11400000, guid: e8d46c910fde01d47843b9e1d4edb324, type: 2}
+    chance: 0.2
+  - tileVariant: {fileID: 11400000, guid: ba8143876cdac394589a6ea8ced0b360, type: 2}
+    chance: 0.2
 --- !u!114 &1492516783
 MonoBehaviour:
   m_ObjectHideFlags: 0
