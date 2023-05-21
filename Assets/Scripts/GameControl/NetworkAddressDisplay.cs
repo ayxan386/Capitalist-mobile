@@ -20,8 +20,9 @@ public class NetworkAddressDisplay : MonoBehaviour
 
     private IEnumerator PopUpText()
     {
+        var temp = networkAddressText.text;
         networkAddressText.text = "Copied";
         yield return new WaitForSeconds(0.4f);
-        networkAddressText.text = NetworkManager.singleton.networkAddress;
+        networkAddressText.text = temp;
     }
 }

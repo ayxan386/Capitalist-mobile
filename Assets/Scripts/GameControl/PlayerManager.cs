@@ -105,7 +105,8 @@ namespace GameControl
 
         private void OnPlayerSpawned(Player obj)
         {
-            nameInput.text = "Player " + obj.netId;
+            if(obj.isOwned)
+                nameInput.text = "Player " + obj.netId;
             players.Add(obj.netId, obj);
             firstPlayer ??= obj;
             prevPlayer ??= obj;
