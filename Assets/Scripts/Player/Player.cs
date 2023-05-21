@@ -143,4 +143,17 @@ public class Player : NetworkBehaviour
             TilePlacer.Instance.RpcBoughtTile(data.position, netId);
         }
     }
+
+    [Command]
+    public void CmdCheckPosition()
+    {
+        var tileData = TilePlacer.Instance.GetTileAt(Position);
+        if (tileData.isOwned && tileData.ownerId != netId)
+        {
+            var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
+            var fee = tileData.baseTile.fee;
+            otherPlayer.CmdUpdateOwnedMoney(otherPlayer.OwnedMoney + fee);
+            ownedMoney -= fee;
+        }
+    }
 }

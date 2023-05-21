@@ -34,7 +34,7 @@ public class DetailedTileDisplayer : MonoBehaviour
         else
         {
             ownerName.alpha = 1;
-            ownerName.text = "Owner: " + PlayerManager.Instance.GetPlayerWithId(data.ownerId);
+            ownerName.text = "Owner: " + PlayerManager.Instance.GetPlayerWithId(data.ownerId).DisplayName;
             purchaseButton.gameObject.SetActive(false);
         }
     }

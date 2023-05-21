@@ -16,4 +16,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   spriteColor: {r: 0.058107615, g: 1, b: 0, a: 1}
   cost: 250
+  fee: 35
   description: Spacious parking lot

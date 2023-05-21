@@ -16,4 +16,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   spriteColor: {r: 0, g: 0.30213785, b: 1, a: 1}
   cost: 150
+  fee: 25
   description: A cozy house

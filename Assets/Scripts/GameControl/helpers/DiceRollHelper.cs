@@ -36,7 +36,7 @@ namespace GameControl.helpers
         [Command(requiresAuthority = false)]
         private void CmdRollDice()
         {
-            var diceRoll = Random.Range(1, 7);
+            var diceRoll = 1;//Random.Range(1, 7);
             RpcDiceRolled(diceRoll);
         }
 
@@ -72,6 +72,7 @@ namespace GameControl.helpers
                 yield return new WaitForSeconds(0.3f);
             }
 
+            player.CmdCheckPosition();
             endTurnButton.interactable = true;
         }
     }
