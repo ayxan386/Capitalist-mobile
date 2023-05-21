@@ -1,8 +1,9 @@
 using System;
+using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class TilePlacer : MonoBehaviour
+public class TilePlacer : NetworkBehaviour
 {
     [SerializeField] private TileDisplayer tileDisplayerPrefabHorizontal;
     [SerializeField] private TileDisplayer tileDisplayerPrefabVertical;
@@ -44,7 +45,7 @@ public class TilePlacer : MonoBehaviour
         for (var index = 0; index < data.Length; index++)
         {
             var tileVariant = data[index];
-            tileDatas[index] = new TileData(tileVariant);
+            tileDatas[index] = new TileData(tileVariant, index);
         }
 
         for (int i = 0; i < tileDatas.Length; i++)
@@ -173,6 +174,20 @@ public class TilePlacer : MonoBehaviour
 
         return res;
     }
+
+    [ClientRpc]
+    public void RpcBoughtTile(int dataPosition, uint ownerId)
+    {
+        var tileData = tileDatas[dataPosition];
+        tileData.isOwned = true;
+        tileData.ownerId = ownerId;
+        TileDisplayerOnClick(tileData);
+    }
+
+    public TileData GetTileAt(int tilePosition)
+    {
+        return tileDatas[tilePosition];
+    }
 }
 
 
@@ -190,11 +205,13 @@ public class TileData
     public Guid id;
     public TileVariant baseTile;
     public bool isOwned;
-    public ulong ownerId;
+    public uint ownerId;
+    public int position;
 
-    public TileData(TileVariant baseTile)
+    public TileData(TileVariant baseTile, int position)
     {
         this.baseTile = baseTile;
+        this.position = position;
         id = Guid.NewGuid();
         isOwned = false;
     }

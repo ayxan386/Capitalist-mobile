@@ -35,6 +35,7 @@ namespace GameControl
         public static PlayerManager Instance { get; private set; }
 
         public Player CurrentPlayer => players[currentPlayersTurn];
+        public Player OwnedPlayer => players[FindOwnedPlayer()];
 
         public Transform PlayersHolder => playersHolder;
         public Transform OtherPlayersDisplayers => otherPlayersDisplayers;
@@ -143,6 +144,11 @@ namespace GameControl
             {
                 OnTurnChanged(currentPlayersTurn, currentPlayersTurn);
             }
+        }
+
+        public Player GetPlayerWithId(uint playerId)
+        {
+            return players[playerId];
         }
     }
 }

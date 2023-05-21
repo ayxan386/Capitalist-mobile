@@ -16,7 +16,8 @@ public class Player : NetworkBehaviour
     [SyncVar(hook = nameof(OnOwnedMoneyChanged))]
     private int ownedMoney = GlobalConstants.StartingMoney;
 
-    [SyncVar] private string displayName;
+    [SyncVar(hook = nameof(OnDisplayNameChanged))]
+    private string displayName;
 
     public int OwnedMoney => ownedMoney;
     public int Position => position;
@@ -92,6 +93,11 @@ public class Player : NetworkBehaviour
         UpdateInfo();
     }
 
+    private void OnDisplayNameChanged(string old, string current)
+    {
+        UpdateInfo();
+    }
+
     [Command]
     public void CmdUpdatePosition(int newPos)
     {
@@ -118,5 +124,23 @@ public class Player : NetworkBehaviour
     private void UpdatePlayerOwnedMoney(int difference)
     {
         CmdUpdateOwnedMoney(OwnedMoney + difference);
+    }
+
+    public bool CanBuyTile(TileData tileData)
+    {
+        return Position == tileData.position 
+               && ownedMoney >= tileData.baseTile.cost 
+               && PlayerManager.Instance.CurrentPlayer.netId == netId;
+    }
+
+    [Command]
+    public void CmdBuyTile(int tilePosition)
+    {
+        var data =TilePlacer.Instance.GetTileAt(tilePosition);
+        if (CanBuyTile(data))
+        {
+            ownedMoney -= data.baseTile.cost;
+            TilePlacer.Instance.RpcBoughtTile(data.position, netId);
+        }
     }
 }
