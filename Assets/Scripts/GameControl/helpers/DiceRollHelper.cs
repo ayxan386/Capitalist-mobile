@@ -53,7 +53,7 @@ namespace GameControl.helpers
             var beforeAnimationPlayer = PlayerManager.Instance.CurrentPlayer;
             for (int i = 0; i < 45; i++)
             {
-                diceRollBackground.transform.Rotate(rotationSpeed);
+                diceRollBackground.transform.Rotate(rotationSpeed * (60 * Time.deltaTime));
                 yield return new WaitForEndOfFrame();
             }
 
@@ -71,6 +71,7 @@ namespace GameControl.helpers
                 player.CmdUpdatePosition(TilePlacer.Instance.CalculatePosition(player.Position, 1));
                 yield return new WaitForSeconds(0.3f);
             }
+
             endTurnButton.interactable = true;
         }
     }

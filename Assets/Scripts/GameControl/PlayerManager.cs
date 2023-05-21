@@ -44,7 +44,6 @@ namespace GameControl
         private void Start()
         {
             Player.OnPlayerSpawned += OnPlayerSpawned;
-            Player.OnPlayerPositionChanged += OnPlayerPositionChanged;
         }
 
         private void OnTurnChanged(uint prevPlayerId, uint nextPlayerId)
@@ -54,7 +53,7 @@ namespace GameControl
             var player = players[nextPlayerId];
             print("is player owned: " + player.isOwned);
             DiceRollHelper.Instance.CanRoll = player.isOwned;
-            turnIndicatorText.text = $"Player {player.DisplayName} turn";
+            turnIndicatorText.text = $"{player.DisplayName} turn";
         }
 
         public void OnPlayerReady()
@@ -68,7 +67,6 @@ namespace GameControl
         {
             totalNumberOfReadyPlayers++;
             players[ownedPlayer].CmdUpdateDisplayName(displayName);
-            players[ownedPlayer].UpdateInfo();
             if (totalNumberOfReadyPlayers == NetworkManager.singleton.numPlayers)
             {
                 var firstPlayer = players.Values.ElementAt(Random.Range(0, totalNumberOfReadyPlayers));
@@ -99,26 +97,20 @@ namespace GameControl
             confirmationMenu.SetActive(false);
             onGoingGameMenu.SetActive(true);
             IsGameStarted = true;
-        }
-
-        private void OnPlayerPositionChanged(Player obj)
-        {
-            PlacePlayer(obj);
+            foreach (var player in players.Values)
+            {
+                player.UpdateInfo();
+            }
         }
 
         private void OnPlayerSpawned(Player obj)
         {
+            nameInput.text = "Player " + obj.netId;
             players.Add(obj.netId, obj);
             firstPlayer ??= obj;
             prevPlayer ??= obj;
             prevPlayer.NextPlayer = obj;
             prevPlayer = obj;
-            PlacePlayer(obj);
-        }
-
-        public void PlacePlayer(Player player)
-        {
-            TilePlacer.Instance.Tiles[player.Position].PlacePlayer(player);
         }
 
         [ClientRpc]

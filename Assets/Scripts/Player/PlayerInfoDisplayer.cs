@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +12,6 @@ public class PlayerInfoDisplayer : MonoBehaviour
     {
         // profilePicture.sprite = player.ProfilePicture;
         displayName.text = player.DisplayName;
-        // ownedMoney.text = player.OwnedMoney;
+        ownedMoney.text = $"${player.OwnedMoney}";
     }
 }
