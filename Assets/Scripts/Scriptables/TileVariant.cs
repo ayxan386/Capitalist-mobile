@@ -8,5 +8,5 @@ public class TileVariant : ScriptableObject
     public Sprite icon;
     public Color spriteColor;
     public int cost;
-
+    public string description;
 }

@@ -17,8 +17,10 @@ public class TilePlacer : MonoBehaviour
     [SerializeField] private Transform topRow;
     [SerializeField] private Transform[] corners;
     [SerializeField] private TileVariant[] cornerTiles;
+    [SerializeField] private DetailedTileDisplayer detailedTileDisplayer;
 
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
+    private TileData[] tileDatas;
 
     public TileDisplayer[] Tiles { get; private set; }
     public static TilePlacer Instance { get; private set; }
@@ -36,15 +38,31 @@ public class TilePlacer : MonoBehaviour
         ;
         var totalCount = CalculateTotalCount();
         Tiles = new TileDisplayer[totalCount];
-        for (int i = 0; i < data.Length; i++)
+
+        tileDatas = new TileData[data.Length];
+
+        for (var index = 0; index < data.Length; index++)
+        {
+            var tileVariant = data[index];
+            tileDatas[index] = new TileData(tileVariant);
+        }
+
+        for (int i = 0; i < tileDatas.Length; i++)
         {
             var holder = FindHolder(i);
             Tiles[i] = Instantiate(FindPrefab(holder), holder);
-            Tiles[i].Display(data[i]);
+            Tiles[i].Display(tileDatas[i]);
         }
 
+
+        TileDisplayer.OnTileClick += TileDisplayerOnClick;
         IsInitializeComplete = true;
         print("Board tiles placed");
+    }
+
+    private void TileDisplayerOnClick(TileData obj)
+    {
+        detailedTileDisplayer.Display(obj);
     }
 
     private Transform FindHolder(int i)
@@ -151,7 +169,8 @@ public class TilePlacer : MonoBehaviour
         k = GenerateTileVariantForSection(k, 1, cornerTiles[2], res);
         k = GenerateTileVariantForSection(k, numberOfTiles.y, null, res);
         k = GenerateTileVariantForSection(k, 1, cornerTiles[3], res);
-        k = GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+        GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+
         return res;
     }
 }
@@ -164,4 +183,19 @@ public class TileVariantSelectionData
 
     public float chance;
     // public bool used;
+}
+
+public class TileData
+{
+    public Guid id;
+    public TileVariant baseTile;
+    public bool isOwned;
+    public ulong ownerId;
+
+    public TileData(TileVariant baseTile)
+    {
+        this.baseTile = baseTile;
+        id = Guid.NewGuid();
+        isOwned = false;
+    }
 }

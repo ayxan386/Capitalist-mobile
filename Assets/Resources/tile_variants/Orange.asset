@@ -15,4 +15,5 @@ MonoBehaviour:
   displayName: Orange
   icon: {fileID: 0}
   spriteColor: {r: 1, g: 0.50731313, b: 0, a: 1}
-  cost: 15
+  cost: 180
+  description: Most delicious burgers

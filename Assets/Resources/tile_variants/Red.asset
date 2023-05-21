@@ -15,4 +15,5 @@ MonoBehaviour:
   displayName: Red
   icon: {fileID: 0}
   spriteColor: {r: 1, g: 0, b: 0, a: 1}
-  cost: 15
+  cost: 230
+  description: Affordable hotel rooms

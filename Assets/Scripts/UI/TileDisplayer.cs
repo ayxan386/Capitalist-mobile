@@ -1,22 +1,35 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TileDisplayer : MonoBehaviour
+public class TileDisplayer : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private RectTransform playerLocation;
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI displayName;
 
-    public void Display(TileVariant data)
+    private TileData data;
+
+    public static event Action<TileData> OnTileClick;
+
+    public void Display(TileData data)
     {
-        icon.sprite = data.icon;
-        icon.color = data.spriteColor;
-        displayName.text = data.displayName;
+        this.data = data;
+        var baseTile = data.baseTile;
+        icon.sprite = baseTile.icon;
+        icon.color = baseTile.spriteColor;
+        displayName.text = baseTile.displayName;
     }
 
     public void PlacePlayer(Player player)
     {
         player.DisplayEnt.position = playerLocation.position;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        OnTileClick?.Invoke(data);
     }
 }

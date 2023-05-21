@@ -15,4 +15,5 @@ MonoBehaviour:
   displayName: Blue 1
   icon: {fileID: 0}
   spriteColor: {r: 0, g: 0.30213785, b: 1, a: 1}
-  cost: 15
+  cost: 150
+  description: A cozy house

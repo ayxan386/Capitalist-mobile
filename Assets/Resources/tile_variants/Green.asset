@@ -15,4 +15,5 @@ MonoBehaviour:
   displayName: Green
   icon: {fileID: 0}
   spriteColor: {r: 0.058107615, g: 1, b: 0, a: 1}
-  cost: 15
+  cost: 250
+  description: Spacious parking lot

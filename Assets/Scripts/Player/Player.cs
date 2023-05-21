@@ -51,16 +51,16 @@ public class Player : NetworkBehaviour
     {
         yield return new WaitUntil(() => TilePlacer.IsInitializeComplete);
 
-        var holder = GameObject.Find("Players");
-        DisplayEnt = Instantiate(playerDisplay, holder.transform);
+        var holder = PlayerManager.Instance.PlayersHolder;
+        DisplayEnt = Instantiate(playerDisplay, holder);
         if (isOwned)
         {
-            infoDisplay = GameObject.Find("PlayerSelfDisplay").GetComponent<PlayerInfoDisplayer>();
+            infoDisplay = PlayerManager.Instance.SelfPlayersDisplayer.GetComponent<PlayerInfoDisplayer>();
         }
         else
         {
-            var otherPlayers = GameObject.Find("OtherPlayers");
-            infoDisplay = Instantiate(infoDisplayPrefab, otherPlayers.transform);
+            var otherPlayers = PlayerManager.Instance.OtherPlayersDisplayers;
+            infoDisplay = Instantiate(infoDisplayPrefab, otherPlayers);
         }
 
         OnPositionChanged(0, 0);

@@ -18,6 +18,9 @@ namespace GameControl
 
         [SerializeField] private GameObject confirmationMenu;
         [SerializeField] private GameObject onGoingGameMenu;
+        [SerializeField] private Transform playersHolder;
+        [SerializeField] private Transform otherPlayersDisplayers;
+        [SerializeField] private Transform selfPlayersDisplayer;
 
         [Header("Indicators")] [SerializeField]
         private TextMeshProUGUI turnIndicatorText;
@@ -32,6 +35,10 @@ namespace GameControl
         public static PlayerManager Instance { get; private set; }
 
         public Player CurrentPlayer => players[currentPlayersTurn];
+
+        public Transform PlayersHolder => playersHolder;
+        public Transform OtherPlayersDisplayers => otherPlayersDisplayers;
+        public Transform SelfPlayersDisplayer => selfPlayersDisplayer;
 
         private Player prevPlayer;
         private Player firstPlayer;
