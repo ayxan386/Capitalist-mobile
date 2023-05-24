@@ -28,6 +28,7 @@ public class Player : NetworkBehaviour
     private static TileVariant[] boardData;
     public static Action<int> PlayerOwnedMoneyChanged;
     public static Action<Player> OnPlayerSpawned;
+    public static Action<Player> OnPlayerDespawned;
 
 
     public override void OnStartClient()
@@ -46,6 +47,14 @@ public class Player : NetworkBehaviour
         {
             PlayerOwnedMoneyChanged += UpdatePlayerOwnedMoney;
         }
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+        OnPlayerDespawned?.Invoke(this);
+        Destroy(DisplayEnt.gameObject);
+        Destroy(infoDisplay.gameObject);
     }
 
     private IEnumerator WaitForBoardThenPlace()
@@ -128,15 +137,15 @@ public class Player : NetworkBehaviour
 
     public bool CanBuyTile(TileData tileData)
     {
-        return Position == tileData.position 
-               && ownedMoney >= tileData.baseTile.cost 
+        return Position == tileData.position
+               && ownedMoney >= tileData.baseTile.cost
                && PlayerManager.Instance.CurrentPlayer.netId == netId;
     }
 
     [Command]
     public void CmdBuyTile(int tilePosition)
     {
-        var data =TilePlacer.Instance.GetTileAt(tilePosition);
+        var data = TilePlacer.Instance.GetTileAt(tilePosition);
         if (CanBuyTile(data))
         {
             ownedMoney -= data.baseTile.cost;

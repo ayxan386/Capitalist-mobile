@@ -1,5 +1,4 @@
 using System;
-using GameControl;
 using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -58,8 +57,21 @@ public class TilePlacer : NetworkBehaviour
 
 
         TileDisplayer.OnTileClick += TileDisplayerOnClick;
+        Player.OnPlayerDespawned += OnPlayerDespawned;
         IsInitializeComplete = true;
         print("Board tiles placed");
+    }
+
+    private void OnPlayerDespawned(Player obj)
+    {
+        foreach (var tileData in tileDatas)
+        {
+            if (tileData.isOwned && tileData.ownerId == obj.netId)
+            {
+                tileData.isOwned = false;
+                tileData.ownerId = 0;
+            }
+        }
     }
 
     private void TileDisplayerOnClick(TileData obj)
@@ -182,6 +194,7 @@ public class TilePlacer : NetworkBehaviour
         var tileData = tileDatas[dataPosition];
         tileData.isOwned = true;
         tileData.ownerId = ownerId;
+        detailedTileDisplayer.IfSameThenDisplay(tileData);
     }
 
     public TileData GetTileAt(int tilePosition)

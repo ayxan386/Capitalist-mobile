@@ -979,6 +979,7 @@ GameObject:
   - component: {fileID: 1006563080}
   - component: {fileID: 1006563082}
   - component: {fileID: 1006563083}
+  - component: {fileID: 1006563084}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -1081,6 +1082,39 @@ MonoBehaviour:
   debugLog: 0
   statisticsGUI: 0
   statisticsLog: 0
+--- !u!114 &1006563084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006563078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c761308e733c51245b2e8bb4201f46dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableActiveDiscovery: 1
+  BroadcastAddress: 47777
+  serverBroadcastListenPort: 47777
+  ActiveDiscoveryInterval: 3
+  transport: {fileID: 1006563083}
+  OnServerFound:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1201288414}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: OnHostFound
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  secretHandshake: 4213195495899899335
 --- !u!1 &1107585363
 GameObject:
   m_ObjectHideFlags: 0
@@ -1260,7 +1294,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5c8b6b1381777f4880060c84cb6038d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfPlayers: {fileID: 593728224}
+  nameOfHost: {fileID: 0}
 --- !u!1 &1243644720
 GameObject:
   m_ObjectHideFlags: 0
@@ -1601,7 +1635,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1549349777}
   m_HandleRect: {fileID: 1549349776}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

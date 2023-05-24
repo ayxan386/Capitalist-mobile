@@ -41,6 +41,8 @@ public class DetailedTileDisplayer : MonoBehaviour
 
     public void OnBuyTile()
     {
+        if (data.isOwned) return;
+
         var player = PlayerManager.Instance.OwnedPlayer;
         player.CmdBuyTile(data.position);
     }

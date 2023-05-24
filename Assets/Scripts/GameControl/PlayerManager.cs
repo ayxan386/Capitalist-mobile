@@ -52,7 +52,9 @@ namespace GameControl
         private void Start()
         {
             Player.OnPlayerSpawned += OnPlayerSpawned;
+            Player.OnPlayerDespawned += OnPlayerDespawned;
         }
+
 
         private void OnTurnChanged(uint prevPlayerId, uint nextPlayerId)
         {
@@ -113,13 +115,30 @@ namespace GameControl
 
         private void OnPlayerSpawned(Player obj)
         {
-            if(obj.isOwned)
+            if (obj.isOwned)
+            {
                 nameInput.text = "Player " + obj.netId;
+                if (IsGameStarted && NetworkManager.singleton.isNetworkActive)
+                {
+                    NetworkManager.singleton.StopClient();
+                }
+            }
+
             players.Add(obj.netId, obj);
             firstPlayer ??= obj;
             prevPlayer ??= obj;
             prevPlayer.NextPlayer = obj;
             prevPlayer = obj;
+        }
+
+        private void OnPlayerDespawned(Player disconnectedPlayer)
+        {
+            if (currentPlayersTurn == disconnectedPlayer.netId)
+            {
+                EndPlayerTurn();
+            }
+
+            players.Remove(disconnectedPlayer.netId);
         }
 
         [ClientRpc]
