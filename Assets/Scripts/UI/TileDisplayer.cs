@@ -25,7 +25,7 @@ public class TileDisplayer : MonoBehaviour, IPointerClickHandler
 
     public void PlacePlayer(Player player)
     {
-        player.DisplayEnt.position = playerLocation.position;
+        player.DisplayEnt.SetParent(playerLocation);
     }
 
     public void OnPointerClick(PointerEventData eventData)

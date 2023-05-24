@@ -1,4 +1,5 @@
 using System;
+using GameControl;
 using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -181,7 +182,6 @@ public class TilePlacer : NetworkBehaviour
         var tileData = tileDatas[dataPosition];
         tileData.isOwned = true;
         tileData.ownerId = ownerId;
-        TileDisplayerOnClick(tileData);
     }
 
     public TileData GetTileAt(int tilePosition)

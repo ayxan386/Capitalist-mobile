@@ -44,4 +44,9 @@ public class DetailedTileDisplayer : MonoBehaviour
         var player = PlayerManager.Instance.OwnedPlayer;
         player.CmdBuyTile(data.position);
     }
+
+    public void IfSameThenDisplay(TileData passedData)
+    {
+        if (data.id == passedData.id) Display(passedData);
+    }
 }
