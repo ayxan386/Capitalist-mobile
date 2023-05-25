@@ -20,9 +20,11 @@ public class TilePlacer : NetworkBehaviour
     [SerializeField] private Transform[] corners;
     [SerializeField] private TileVariant[] cornerTiles;
     [SerializeField] private DetailedTileDisplayer detailedTileDisplayer;
-
+    [SerializeField] private Transform extrasParent;
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
+
     private TileData[] tileDatas;
+    private Dictionary<string, TileVariant> allTiles;
 
     public TileDisplayer[] Tiles { get; private set; }
     public static TilePlacer Instance { get; private set; }
@@ -32,9 +34,20 @@ public class TilePlacer : NetworkBehaviour
     private void Awake()
     {
         Instance = this;
+        allTiles = new Dictionary<string, TileVariant>();
+        foreach (var selectionData in selectionDatas)
+        {
+            allTiles.Add(selectionData.tileVariant.displayName, selectionData.tileVariant);
+        }
+
+        foreach (var selectionData in cornerTiles)
+        {
+            if(!allTiles.ContainsKey(selectionData.displayName))
+                allTiles.Add(selectionData.displayName, selectionData);
+        }
     }
 
-    public void PlaceTiles(TileVariant[] data)
+    public void PlaceTiles(string[] data)
     {
         if (Tiles != null) return;
         ;
@@ -45,8 +58,15 @@ public class TilePlacer : NetworkBehaviour
 
         for (var index = 0; index < data.Length; index++)
         {
-            var tileVariant = data[index];
+            var tileVariant = allTiles[data[index]];
             tileDatas[index] = new TileData(tileVariant, index);
+            print($"tile at {index} has {tileVariant.extraEvents}");
+            if (tileVariant.extraEvents != null)
+            {
+                print("Creating extra event object");
+                tileDatas[index].extraEvent =
+                    Instantiate(tileVariant.extraEvents, extrasParent).GetComponent<BaseTile>();
+            }
         }
 
         for (int i = 0; i < tileDatas.Length; i++)
@@ -226,6 +246,7 @@ public class TileData
     public bool isOwned;
     public uint ownerId;
     public int position;
+    public BaseTile extraEvent;
 
     public TileData(TileVariant baseTile, int position)
     {

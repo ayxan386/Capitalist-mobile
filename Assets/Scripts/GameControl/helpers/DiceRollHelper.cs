@@ -36,7 +36,8 @@ namespace GameControl.helpers
         [Command(requiresAuthority = false)]
         private void CmdRollDice()
         {
-            var diceRoll = Random.Range(1, 7);
+            // var diceRoll = Random.Range(1, 7);
+            var diceRoll = 5;
             RpcDiceRolled(diceRoll);
         }
 
@@ -66,9 +67,9 @@ namespace GameControl.helpers
             }
         }
 
-        private IEnumerator MovePlayer(int diceRoll, Player player)
+        public IEnumerator MovePlayer(int dist, Player player)
         {
-            for (int i = 0; i < diceRoll; i++)
+            for (int i = 0; i < dist; i++)
             {
                 player.CmdUpdatePosition(TilePlacer.Instance.CalculatePosition(player.Position, 1));
                 yield return new WaitForSeconds(0.3f);
@@ -76,6 +77,23 @@ namespace GameControl.helpers
 
             player.CmdCheckPosition();
             endTurnButton.interactable = true;
+        }
+
+
+        [Command(requiresAuthority = false)]
+        public void CmdMoveToTile(int selectedTile)
+        {
+            var currentPlayer = PlayerManager.Instance.CurrentPlayer;
+            currentPlayer.eventMove = true;
+            var tilesLength = TilePlacer.Instance.Tiles.Length;
+            var dist = selectedTile - currentPlayer.Position;
+
+            if (dist < -1)
+            {
+                dist += tilesLength;
+            }
+
+            StartCoroutine(MovePlayer(dist, currentPlayer));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using GameControl;
 using Mirror;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Player : NetworkBehaviour
 {
@@ -19,10 +20,14 @@ public class Player : NetworkBehaviour
     [SyncVar(hook = nameof(OnDisplayNameChanged))]
     private string displayName;
 
+    [SyncVar]
+    public bool eventMove; 
+
     public int OwnedMoney => ownedMoney;
     public int Position => position;
     public string DisplayName => displayName;
     public RectTransform DisplayEnt { get; private set; }
+
     public Player NextPlayer { get; set; }
 
     private static TileVariant[] boardData;
@@ -38,7 +43,12 @@ public class Player : NetworkBehaviour
         if (isServer)
         {
             boardData ??= TilePlacer.Instance.GenerateBoardData();
-            RpcDisplayBoard(boardData);
+            var tileNames = new string[boardData.Length];
+            for (int i = 0; i < boardData.Length; i++)
+            {
+                tileNames[i] = boardData[i].displayName;
+            }
+            RpcDisplayBoard(tileNames);
         }
 
 
@@ -80,14 +90,14 @@ public class Player : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcDisplayBoard(TileVariant[] boardData)
+    private void RpcDisplayBoard(string[] boardData)
     {
         TilePlacer.Instance.PlaceTiles(boardData);
     }
 
     private void OnPositionChanged(int old, int current)
     {
-        if (isOwned && old > current)
+        if (isOwned && !eventMove && old > current)
         {
             PlayerOwnedMoneyChanged?.Invoke(GlobalConstants.RoundSalary);
         }
@@ -161,12 +171,31 @@ public class Player : NetworkBehaviour
     public void CmdCheckPosition()
     {
         var tileData = TilePlacer.Instance.GetTileAt(Position);
-        if (tileData.isOwned && tileData.ownerId != netId)
+        print($"Checking {DisplayName} position {Position} with tile {tileData.baseTile.displayName}");
+        if (!tileData.baseTile.government && tileData.isOwned && tileData.ownerId != netId)
         {
             var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
             var fee = tileData.baseTile.fee;
             otherPlayer.ServerSideOnlyUpdateMoney(fee);
             ownedMoney -= fee;
         }
+        else
+        {
+            print("Inside else in check position");
+            if (tileData.extraEvent != null)
+            {
+                RpcCheckTile();
+            }
+        }
+    }
+
+    [ClientRpc]
+    private void RpcCheckTile()
+    {
+        print("Checking for extra events");
+        if (!isOwned || !PlayerManager.Instance.CurrentPlayer.isOwned) return;
+
+        var tileData = TilePlacer.Instance.GetTileAt(Position);
+        tileData.extraEvent.PlayerArrived();
     }
 }

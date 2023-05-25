@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TileVariant", menuName = "ScriptableObjects/TileVariant", order = 1)]
@@ -10,4 +9,6 @@ public class TileVariant : ScriptableObject
     public int cost;
     public int fee;
     public string description;
+    public bool government;
+    public GameObject extraEvents;
 }
