@@ -1,28 +1,48 @@
-using Mirror.Discovery;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class MainMenuController : MonoBehaviour
 {
-    [SerializeField] private TMP_InputField nameOfHost;
+    [SerializeField] private TMP_Dropdown servers;
+
+    private List<DiscoveryResponse> serversList;
+
+    private IEnumerator Start()
+    {
+        while (true)
+        {
+            servers.ClearOptions();
+            serversList = new List<DiscoveryResponse>();
+            yield return new WaitForSeconds(4);
+        }
+    }
 
     public void StartGame()
     {
-        // PlayerPrefs.SetInt(GlobalConstants.NumberOfPlayersKey, int.Parse(numberOfPlayers.text));
-        NetworkLayer.Instance.JoinGame(nameOfHost.text);
-        // SceneManager.LoadScene("SampleScene");
+        var uri = serversList[servers.value].uri;
+        NetworkLayer.Instance.JoinGame(uri);
     }
 
     public void HostGame()
     {
         NetworkLayer.Instance.StartHost();
-        // SceneManager.LoadScene("SampleScene");
     }
 
-    public void OnHostFound(ServerResponse response)
+    public void OnHostFound(DiscoveryResponse response)
     {
-        nameOfHost.text = response.uri.ToString();
+        var foundIndex = serversList.FindIndex(server => server.serverId == response.serverId);
+        if (foundIndex >= 0)
+        {
+            serversList.RemoveAt(foundIndex);
+            servers.options.RemoveAt(foundIndex);
+        }
+
+        serversList.Add(response);
+        servers.options.Add(new TMP_Dropdown.OptionData(response.hostName));
+
+        if (serversList.Count == 1)
+            servers.RefreshShownValue();
     }
 }

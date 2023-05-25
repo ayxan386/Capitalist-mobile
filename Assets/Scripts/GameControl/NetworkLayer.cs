@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Mirror;
+using Mirror.Discovery;
 using UnityEngine;
 
 public class NetworkLayer : MonoBehaviour
@@ -9,6 +10,7 @@ public class NetworkLayer : MonoBehaviour
     public static NetworkLayer Instance { get; private set; }
 
     [SerializeField] private NetworkManager networkManager;
+    [SerializeField] private CustomNetworkDiscovery networkDiscovery;
 
 
     private void Awake()
@@ -16,18 +18,22 @@ public class NetworkLayer : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+       networkDiscovery.StartDiscovery(); 
+    }
+
     public void StartHost()
     {
         networkManager.networkAddress = GetLocalIPAddress();
         print("Network address: " + networkManager.networkAddress);
         networkManager.StartHost();
+        networkDiscovery.AdvertiseServer();
     }
 
-    public void JoinGame(string ip)
+    public void JoinGame(Uri ip)
     {
-        networkManager.networkAddress = ip;
-        print("Joining game: " + networkManager.networkAddress);
-        networkManager.StartClient();
+        networkManager.StartClient(ip);
     }
 
     public static string GetLocalIPAddress()
