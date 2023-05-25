@@ -74,7 +74,6 @@ public class Player : NetworkBehaviour
         }
 
         OnPositionChanged(0, 0);
-        // CmdUpdatePosition(0);
         CmdUpdateOwnedMoney(GlobalConstants.StartingMoney);
 
         OnPlayerSpawned?.Invoke(this);
@@ -119,6 +118,11 @@ public class Player : NetworkBehaviour
         ownedMoney = amount;
     }
 
+    private void ServerSideOnlyUpdateMoney(int diff)
+    {
+        ownedMoney += diff;
+    }
+
     public void CmdUpdateDisplayName(string newName)
     {
         displayName = newName;
@@ -161,7 +165,7 @@ public class Player : NetworkBehaviour
         {
             var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
             var fee = tileData.baseTile.fee;
-            otherPlayer.CmdUpdateOwnedMoney(otherPlayer.OwnedMoney + fee);
+            otherPlayer.ServerSideOnlyUpdateMoney(fee);
             ownedMoney -= fee;
         }
     }

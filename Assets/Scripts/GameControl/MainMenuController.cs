@@ -15,7 +15,7 @@ public class MainMenuController : MonoBehaviour
         {
             servers.ClearOptions();
             serversList = new List<DiscoveryResponse>();
-            yield return new WaitForSeconds(4);
+            yield return new WaitForSeconds(12);
         }
     }
 
