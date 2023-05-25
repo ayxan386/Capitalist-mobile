@@ -139,6 +139,15 @@ namespace GameControl
             }
 
             players.Remove(disconnectedPlayer.netId);
+            var curr = firstPlayer;
+            var prev = curr;
+            while (curr.netId != disconnectedPlayer.netId && curr.NextPlayer.netId != firstPlayer.netId)
+            {
+                prev = curr;
+                curr = curr.NextPlayer;
+            }
+
+            prev.NextPlayer = curr.NextPlayer;
         }
 
         [ClientRpc]

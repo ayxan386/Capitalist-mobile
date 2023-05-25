@@ -52,7 +52,7 @@ public class DetailedTileDisplayer : MonoBehaviour
 
     public void IfSameThenDisplay(TileData passedData)
     {
-        if (data.id == passedData.id) Display(passedData);
+        if (data != null && passedData != null && data.id == passedData.id) Display(passedData);
     }
 
     public void ShowNextTile(int dir = 1)
