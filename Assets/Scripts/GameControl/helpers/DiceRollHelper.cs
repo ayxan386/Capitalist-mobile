@@ -51,10 +51,12 @@ namespace GameControl.helpers
         {
             diceRollText.text = diceRoll.ToString();
             var beforeAnimationPlayer = PlayerManager.Instance.CurrentPlayer;
-            for (int i = 0; i < 45; i++)
+            int duration = (int)(1 / Time.deltaTime) * 3 / 4;
+            print("Animation duration is " + duration);
+            for (int i = 0; i < duration; i++)
             {
                 diceRollBackground.transform.Rotate(rotationSpeed * (60 * Time.deltaTime));
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
 
             diceRollBackground.transform.rotation = Quaternion.identity;
