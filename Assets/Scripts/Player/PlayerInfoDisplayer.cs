@@ -14,4 +14,5 @@ public class PlayerInfoDisplayer : MonoBehaviour
         displayName.text = player.DisplayName;
         ownedMoney.text = $"${player.OwnedMoney}";
     }
+
 }

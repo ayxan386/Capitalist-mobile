@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -200,6 +201,11 @@ public class TilePlacer : NetworkBehaviour
     public TileData GetTileAt(int tilePosition)
     {
         return tileDatas[tilePosition];
+    }
+
+    public List<TileData> GetTilesOwnedBy(Player player)
+    {
+        return new List<TileData>(tileDatas).FindAll(tile => tile.isOwned && tile.ownerId == player.netId);
     }
 }
 
