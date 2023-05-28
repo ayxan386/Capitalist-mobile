@@ -248,6 +248,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerLocation: {fileID: 880189029006786053}
   icon: {fileID: 2539671056174340746}
+  iconBackground: {fileID: 8829274487512419231}
   displayName: {fileID: 2539671057177954214}
   highlightFrame: {fileID: 3704038312220594100}
   dimColor: {r: 1, g: 1, b: 1, a: 0}

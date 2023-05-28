@@ -51,7 +51,7 @@ public class TeleportationCorner : BaseTile
     }
 
 
-    public override void PlayerArrived(Player player)
+    public override void PlayerArrived(Player player, TileData selfData)
     {
         ownedPlayer = player;
         randomButton.interactable = player.OwnedMoney >= randomCost;

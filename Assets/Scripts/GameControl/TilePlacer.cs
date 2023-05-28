@@ -229,6 +229,18 @@ public class TilePlacer : NetworkBehaviour
         StartCoroutine(AnimateSelection(selectedPos));
     }
 
+    [Command(requiresAuthority = false)]
+    public void CmdUpgradedTile(int position, int newFee)
+    {
+        RpcUpgradedTile(position, newFee);
+    }
+
+    [ClientRpc]
+    private void RpcUpgradedTile(int position, int newFee)
+    {
+        tileDatas[position].fee = newFee;
+    }
+
     private IEnumerator AnimateSelection(int selectedPos)
     {
         audioSource.PlayOneShot(randomSelectionClip);
@@ -284,11 +296,13 @@ public class TileData
     public uint ownerId;
     public int position;
     public BaseTile extraEvent;
+    public int fee;
 
     public TileData(TileVariant baseTile, int position)
     {
         this.baseTile = baseTile;
         this.position = position;
+        fee = baseTile.fee;
         id = Guid.NewGuid();
         isOwned = false;
     }

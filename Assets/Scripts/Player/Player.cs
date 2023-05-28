@@ -3,6 +3,8 @@ using System.Collections;
 using GameControl;
 using Mirror;
 using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Player : NetworkBehaviour
 {
@@ -19,8 +21,10 @@ public class Player : NetworkBehaviour
     [SyncVar(hook = nameof(OnDisplayNameChanged))]
     private string displayName;
 
-    [SyncVar]
-    public bool eventMove; 
+    [SyncVar] public bool eventMove;
+
+    [SyncVar(hook = nameof(OnColorChanged))]
+    public Color displayColor;
 
     public int OwnedMoney => ownedMoney;
     public int Position => position;
@@ -47,6 +51,7 @@ public class Player : NetworkBehaviour
             {
                 tileNames[i] = boardData[i].displayName;
             }
+
             RpcDisplayBoard(tileNames);
         }
 
@@ -75,6 +80,9 @@ public class Player : NetworkBehaviour
         if (isOwned)
         {
             infoDisplay = PlayerManager.Instance.SelfPlayersDisplayer.GetComponent<PlayerInfoDisplayer>();
+            var temp = Random.ColorHSV(0, 1, 0.8f, 1f, 0.6f, 1f);
+            temp.a = 1;
+            CmdUpdateColor(temp);
         }
         else
         {
@@ -132,6 +140,20 @@ public class Player : NetworkBehaviour
         ownedMoney = amount;
     }
 
+    [Command]
+    public void CmdUpdateColor(Color color)
+    {
+        displayColor = color;
+    }
+
+    private void OnColorChanged(Color old, Color curr)
+    {
+        DisplayEnt.GetComponent<Image>().color = curr;
+        UpdateInfo();
+        if (isOwned)
+            PlayerManager.Instance.PlayerColor.color = curr;
+    }
+
     private void ServerSideOnlyUpdateMoney(int diff)
     {
         ownedMoney += diff;
@@ -179,7 +201,7 @@ public class Player : NetworkBehaviour
         if (!tileData.baseTile.government && tileData.isOwned && tileData.ownerId != netId)
         {
             var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
-            var fee = tileData.baseTile.fee;
+            var fee = tileData.fee;
             otherPlayer.ServerSideOnlyUpdateMoney(fee);
             ownedMoney -= fee;
         }
@@ -200,6 +222,6 @@ public class Player : NetworkBehaviour
         if (!isOwned || !PlayerManager.Instance.CurrentPlayer.isOwned) return;
 
         var tileData = TilePlacer.Instance.GetTileAt(Position);
-        tileData.extraEvent.PlayerArrived(this);
+        tileData.extraEvent.PlayerArrived(this, tileData);
     }
 }

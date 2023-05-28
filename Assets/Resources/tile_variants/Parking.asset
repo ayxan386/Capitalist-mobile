@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 16b09c3a71f15c444a5de8fe1a85d0cc, type: 3}
-  m_Name: Blue
+  m_Name: Parking
   m_EditorClassIdentifier: 
-  displayName: Blue 1
-  icon: {fileID: 0}
-  spriteColor: {r: 0, g: 0.30213785, b: 1, a: 1}
-  cost: 150
-  fee: 25
-  description: A cozy house
+  displayName: Parking
+  icon: {fileID: 21300000, guid: afe9ba7fd23269f409946dd2e4005653, type: 3}
+  spriteColor: {r: 0.058107615, g: 1, b: 0, a: 1}
+  cost: 120
+  fee: 15
+  description: Spacious parking lot
+  government: 0
+  extraEvents: {fileID: 4710702866125777302, guid: 1b5fd2976481b734b8eedf6e1cdaf0df, type: 3}

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class DetailedTileDisplayer : MonoBehaviour
 {
     [SerializeField] private Image icon;
+    [SerializeField] private Image iconBackground;
     [SerializeField] private TextMeshProUGUI displayName;
     [SerializeField] private TextMeshProUGUI ownerName;
     [SerializeField] private TextMeshProUGUI description;
@@ -20,9 +21,9 @@ public class DetailedTileDisplayer : MonoBehaviour
         this.data = data;
         var baseTile = data.baseTile;
         icon.sprite = baseTile.icon;
-        icon.color = baseTile.spriteColor;
+        iconBackground.color = baseTile.spriteColor;
         displayName.text = "Name: " + baseTile.displayName;
-        description.text = baseTile.description + "\n Fee: " + baseTile.fee;
+        description.text = baseTile.description + "\n Fee: " + data.fee;
 
         if (!data.isOwned)
         {

@@ -5,6 +5,7 @@ using GameControl.helpers;
 using Mirror;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace GameControl
@@ -21,6 +22,7 @@ namespace GameControl
         [SerializeField] private Transform playersHolder;
         [SerializeField] private Transform otherPlayersDisplayers;
         [SerializeField] private Transform selfPlayersDisplayer;
+        [SerializeField] private Image playerColor;
 
         [Header("Indicators")] [SerializeField]
         private TextMeshProUGUI turnIndicatorText;
@@ -40,6 +42,8 @@ namespace GameControl
         public Transform PlayersHolder => playersHolder;
         public Transform OtherPlayersDisplayers => otherPlayersDisplayers;
         public Transform SelfPlayersDisplayer => selfPlayersDisplayer;
+
+        public Image PlayerColor => playerColor;
 
         private Player prevPlayer;
         private Player firstPlayer;
@@ -154,6 +158,10 @@ namespace GameControl
         public void RpcPlayerReadyCountChange(int newTotal)
         {
             totalNumberDisplay.text = newTotal + " players ready";
+            foreach (var player in players.Values)
+            {
+                player.UpdateInfo();
+            } 
         }
 
         public void EndPlayerTurn()

@@ -12,6 +12,7 @@ namespace GameControl.helpers
         [SerializeField] private Vector3 rotationSpeed;
         [SerializeField] private GameObject diceRollBackground;
         [SerializeField] private Button endTurnButton;
+        [SerializeField] private Vector2Int rollRange = new Vector2Int(1, 7);
 
         public static DiceRollHelper Instance { get; private set; }
 
@@ -36,8 +37,8 @@ namespace GameControl.helpers
         [Command(requiresAuthority = false)]
         private void CmdRollDice()
         {
-            // var diceRoll = Random.Range(1, 7);
-            var diceRoll = 5;
+            var diceRoll = Random.Range(rollRange.x, rollRange.y);
+            // var diceRoll = 5;
             RpcDiceRolled(diceRoll);
         }
 

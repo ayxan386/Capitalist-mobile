@@ -11,6 +11,7 @@ public class PlayerInfoDisplayer : MonoBehaviour
     public void Display(Player player)
     {
         // profilePicture.sprite = player.ProfilePicture;
+        profilePicture.color = player.displayColor;
         displayName.text = player.DisplayName;
         ownedMoney.text = $"${player.OwnedMoney}";
     }

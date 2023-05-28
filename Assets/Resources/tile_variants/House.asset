@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 16b09c3a71f15c444a5de8fe1a85d0cc, type: 3}
-  m_Name: Green
+  m_Name: House
   m_EditorClassIdentifier: 
-  displayName: Green
-  icon: {fileID: 21300000, guid: afe9ba7fd23269f409946dd2e4005653, type: 3}
-  spriteColor: {r: 0.058107615, g: 1, b: 0, a: 1}
-  cost: 250
-  fee: 35
-  description: Spacious parking lot
+  displayName: House
+  icon: {fileID: 21300000, guid: 2434e3fc036f15f40b9c1a3eab0d51ba, type: 3}
+  spriteColor: {r: 0, g: 0.30213785, b: 1, a: 1}
+  cost: 150
+  fee: 25
+  description: A cozy house
   government: 0
-  extraEvents: {fileID: 0}
+  extraEvents: {fileID: 4710702866125777302, guid: 135cebcf95716c541a8aaaa664b08506, type: 3}

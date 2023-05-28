@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: TeleportationCorner
   m_EditorClassIdentifier: 
   displayName: Teleportation
-  icon: {fileID: 0}
-  spriteColor: {r: 0, g: 0, b: 0, a: 1}
+  icon: {fileID: 21300000, guid: c76d93ebf9a259044ae0ab876fc983d2, type: 3}
+  spriteColor: {r: 1, g: 1, b: 1, a: 1}
   cost: 9999
   fee: 0
   description: Teleportation Corner

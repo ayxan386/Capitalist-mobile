@@ -4,6 +4,6 @@ using UnityEngine;
 [Serializable]
 public abstract class BaseTile : MonoBehaviour
 {
-    public abstract void PlayerArrived(Player player);
+    public abstract void PlayerArrived(Player player, TileData selfData);
     
 }

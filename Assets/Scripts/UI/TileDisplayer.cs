@@ -8,6 +8,7 @@ public class TileDisplayer : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private RectTransform playerLocation;
     [SerializeField] private Image icon;
+    [SerializeField] private Image iconBackground;
     [SerializeField] private TextMeshProUGUI displayName;
     [Header("Highlighting")]
     [SerializeField] private Image highlightFrame;
@@ -22,7 +23,7 @@ public class TileDisplayer : MonoBehaviour, IPointerClickHandler
         this.data = data;
         var baseTile = data.baseTile;
         icon.sprite = baseTile.icon;
-        icon.color = baseTile.spriteColor;
+        iconBackground.color = baseTile.spriteColor;
         displayName.text = baseTile.displayName;
     }
 
