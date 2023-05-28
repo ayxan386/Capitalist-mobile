@@ -9,7 +9,10 @@ public class TileDisplayer : MonoBehaviour, IPointerClickHandler
     [SerializeField] private RectTransform playerLocation;
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI displayName;
-
+    [Header("Highlighting")]
+    [SerializeField] private Image highlightFrame;
+    [SerializeField] private Color dimColor;
+    [SerializeField] private Color highLightColor;
     private TileData data;
 
     public static event Action<TileData> OnTileClick;
@@ -31,5 +34,15 @@ public class TileDisplayer : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         OnTileClick?.Invoke(data);
+    }
+
+    public void Highlight()
+    {
+        highlightFrame.color = highLightColor;
+    }
+
+    public void CancelHighlight()
+    {
+        highlightFrame.color = dimColor;
     }
 }

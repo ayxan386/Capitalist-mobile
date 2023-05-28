@@ -52,6 +52,7 @@ namespace GameControl.helpers
         {
             diceRollText.text = diceRoll.ToString();
             var beforeAnimationPlayer = PlayerManager.Instance.CurrentPlayer;
+            beforeAnimationPlayer.eventMove = false;
             int duration = (int)(1 / Time.deltaTime) * 3 / 4;
             print("Animation duration is " + duration);
             for (int i = 0; i < duration; i++)
@@ -63,37 +64,10 @@ namespace GameControl.helpers
             diceRollBackground.transform.rotation = Quaternion.identity;
             if (beforeAnimationPlayer.isOwned)
             {
-                StartCoroutine(MovePlayer(diceRoll, beforeAnimationPlayer));
+                PlayerMovementHelper.Instance.CmdAnimatedMoveToTile(
+                    TilePlacer.Instance.CalculatePosition(beforeAnimationPlayer.Position, diceRoll));
+                endTurnButton.interactable = true;
             }
-        }
-
-        public IEnumerator MovePlayer(int dist, Player player)
-        {
-            for (int i = 0; i < dist; i++)
-            {
-                player.CmdUpdatePosition(TilePlacer.Instance.CalculatePosition(player.Position, 1));
-                yield return new WaitForSeconds(0.3f);
-            }
-
-            player.CmdCheckPosition();
-            endTurnButton.interactable = true;
-        }
-
-
-        [Command(requiresAuthority = false)]
-        public void CmdMoveToTile(int selectedTile)
-        {
-            var currentPlayer = PlayerManager.Instance.CurrentPlayer;
-            currentPlayer.eventMove = true;
-            var tilesLength = TilePlacer.Instance.Tiles.Length;
-            var dist = selectedTile - currentPlayer.Position;
-
-            if (dist < -1)
-            {
-                dist += tilesLength;
-            }
-
-            StartCoroutine(MovePlayer(dist, currentPlayer));
         }
     }
 }

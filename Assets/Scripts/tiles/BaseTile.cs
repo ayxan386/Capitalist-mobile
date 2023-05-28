@@ -4,5 +4,6 @@ using UnityEngine;
 [Serializable]
 public abstract class BaseTile : MonoBehaviour
 {
-    public abstract void PlayerArrived();
+    public abstract void PlayerArrived(Player player);
+    
 }

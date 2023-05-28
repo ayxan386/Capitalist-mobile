@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using GameControl.helpers;
 using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -42,7 +44,7 @@ public class TilePlacer : NetworkBehaviour
 
         foreach (var selectionData in cornerTiles)
         {
-            if(!allTiles.ContainsKey(selectionData.displayName))
+            if (!allTiles.ContainsKey(selectionData.displayName))
                 allTiles.Add(selectionData.displayName, selectionData);
         }
     }
@@ -216,6 +218,37 @@ public class TilePlacer : NetworkBehaviour
         tileData.isOwned = true;
         tileData.ownerId = ownerId;
         detailedTileDisplayer.IfSameThenDisplay(tileData);
+    }
+
+    [ClientRpc]
+    public void RpcAnimatedSelection(int selectedPos)
+    {
+        StartCoroutine(AnimateSelection(selectedPos));
+    }
+
+    private IEnumerator AnimateSelection(int selectedPos)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < Tiles.Length; j++)
+            {
+                Tiles[j].Highlight();
+                yield return new WaitForSeconds(0.1f);
+                Tiles[j].CancelHighlight();
+            }
+        }
+
+        for (int i = 0; i < selectedPos; i++)
+        {
+            Tiles[i].Highlight();
+            yield return new WaitForSeconds(0.1f);
+            Tiles[i].CancelHighlight();
+        }
+
+        Tiles[selectedPos].Highlight();
+        PlayerMovementHelper.Instance.CmdAnimationComplete();
+        yield return new WaitForSeconds(1.2f);
+        Tiles[selectedPos].CancelHighlight();
     }
 
     public TileData GetTileAt(int tilePosition)

@@ -3,7 +3,6 @@ using System.Collections;
 using GameControl;
 using Mirror;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Player : NetworkBehaviour
 {
@@ -122,6 +121,11 @@ public class Player : NetworkBehaviour
         position = newPos;
     }
 
+    public void UpdatePositionServerSide(int newPos)
+    {
+        position = newPos;
+    }
+
     [Command]
     public void CmdUpdateOwnedMoney(int amount)
     {
@@ -167,7 +171,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdCheckPosition()
     {
         var tileData = TilePlacer.Instance.GetTileAt(Position);
@@ -196,6 +200,6 @@ public class Player : NetworkBehaviour
         if (!isOwned || !PlayerManager.Instance.CurrentPlayer.isOwned) return;
 
         var tileData = TilePlacer.Instance.GetTileAt(Position);
-        tileData.extraEvent.PlayerArrived();
+        tileData.extraEvent.PlayerArrived(this);
     }
 }
