@@ -9,6 +9,9 @@ namespace GameControl.helpers
 {
     public class PlayerMovementHelper : NetworkBehaviour
     {
+        [SerializeField] private AudioClip movementSoundClip;
+        [SerializeField] private AudioSource audioSource;
+        
         public static PlayerMovementHelper Instance { get; private set; }
 
         [SyncVar] private int selectedTile;
@@ -26,6 +29,7 @@ namespace GameControl.helpers
             for (int i = 0; i < dist; i++)
             {
                 player.UpdatePositionServerSide(TilePlacer.Instance.CalculatePosition(player.Position, 1));
+                audioSource.PlayOneShot(movementSoundClip);
                 yield return new WaitForSeconds(0.3f);
             }
 
@@ -62,6 +66,7 @@ namespace GameControl.helpers
             }
 
             currentPlayer.UpdatePositionServerSide(TilePlacer.Instance.CalculatePosition(currentPlayer.Position, dist));
+            audioSource.PlayOneShot(movementSoundClip);
         }
 
         [Command(requiresAuthority = false)]
@@ -88,7 +93,7 @@ namespace GameControl.helpers
         [ClientRpc]
         private void RpcInformOfCompletion()
         {
-           OnSelectionComplete?.Invoke(selectedTile); 
+            OnSelectionComplete?.Invoke(selectedTile); 
         }
     }
 }

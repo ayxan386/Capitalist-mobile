@@ -25,6 +25,9 @@ public class TilePlacer : NetworkBehaviour
     [SerializeField] private Transform extrasParent;
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
 
+    [Header("SFX")] [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip randomSelectionClip;
+
     private TileData[] tileDatas;
     private Dictionary<string, TileVariant> allTiles;
 
@@ -228,6 +231,7 @@ public class TilePlacer : NetworkBehaviour
 
     private IEnumerator AnimateSelection(int selectedPos)
     {
+        audioSource.PlayOneShot(randomSelectionClip);
         for (int i = 0; i < 2; i++)
         {
             for (int j = 0; j < Tiles.Length; j++)

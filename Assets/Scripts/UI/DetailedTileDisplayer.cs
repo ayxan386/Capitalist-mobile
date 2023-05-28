@@ -22,7 +22,7 @@ public class DetailedTileDisplayer : MonoBehaviour
         icon.sprite = baseTile.icon;
         icon.color = baseTile.spriteColor;
         displayName.text = "Name: " + baseTile.displayName;
-        description.text = baseTile.description;
+        description.text = baseTile.description + "\n Fee: " + baseTile.fee;
 
         if (!data.isOwned)
         {
