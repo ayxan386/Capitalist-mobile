@@ -17,6 +17,6 @@ MonoBehaviour:
   spriteColor: {r: 0, g: 0, b: 0, a: 1}
   cost: 9999
   fee: 0
-  description: Govrenment building
+  description: Government building
   government: 1
   extraEvents: {fileID: 0}

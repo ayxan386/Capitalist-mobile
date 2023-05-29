@@ -27,6 +27,9 @@ namespace GameControl
         [Header("Indicators")] [SerializeField]
         private TextMeshProUGUI turnIndicatorText;
 
+        [SerializeField] private AudioSource soundSource;
+        [SerializeField] private GameObject exitConfirmation;
+
         private Dictionary<uint, Player> players = new();
         private int totalNumberOfReadyPlayers;
 
@@ -35,6 +38,8 @@ namespace GameControl
 
         public static bool IsGameStarted { get; private set; }
         public static PlayerManager Instance { get; private set; }
+
+        public AudioSource SfxSource => soundSource;
 
         public Player CurrentPlayer => players[currentPlayersTurn];
         public Player OwnedPlayer => players[FindOwnedPlayer()];
@@ -65,9 +70,13 @@ namespace GameControl
             CurrentPlayer.UpdateInfo();
             currentPlayersTurn = nextPlayerId;
             var player = players[nextPlayerId];
-            print("is player owned: " + player.isOwned);
             DiceRollHelper.Instance.CanRoll = player.isOwned;
             turnIndicatorText.text = $"{player.DisplayName} turn";
+
+            if (player.isOwned)
+            {
+                Handheld.Vibrate();
+            }
         }
 
         public void OnPlayerReady()
@@ -117,22 +126,23 @@ namespace GameControl
             }
         }
 
-        private void OnPlayerSpawned(Player obj)
+        private void OnPlayerSpawned(Player newPlayer)
         {
-            if (obj.isOwned)
+            if (newPlayer.isOwned)
             {
-                nameInput.text = "Player " + obj.netId;
+                nameInput.text = "Player " + newPlayer.netId;
                 if (IsGameStarted && NetworkManager.singleton.isNetworkActive)
                 {
                     NetworkManager.singleton.StopClient();
                 }
             }
 
-            players.Add(obj.netId, obj);
-            firstPlayer ??= obj;
-            prevPlayer ??= obj;
-            prevPlayer.NextPlayer = obj;
-            prevPlayer = obj;
+            players.Add(newPlayer.netId, newPlayer);
+            firstPlayer ??= newPlayer;
+            prevPlayer ??= newPlayer;
+            prevPlayer.NextPlayer = newPlayer;
+            newPlayer.PrevPlayer = prevPlayer;
+            prevPlayer = newPlayer;
         }
 
         private void OnPlayerDespawned(Player disconnectedPlayer)
@@ -143,15 +153,16 @@ namespace GameControl
             }
 
             players.Remove(disconnectedPlayer.netId);
-            var curr = firstPlayer;
-            var prev = curr;
-            while (curr.netId != disconnectedPlayer.netId && curr.NextPlayer.netId != firstPlayer.netId)
-            {
-                prev = curr;
-                curr = curr.NextPlayer;
-            }
-
-            prev.NextPlayer = curr.NextPlayer;
+            disconnectedPlayer.PrevPlayer.NextPlayer = disconnectedPlayer.NextPlayer;
+            // var curr = firstPlayer;
+            // var prev = curr;
+            // while (curr.netId != disconnectedPlayer.netId && curr.NextPlayer.netId != firstPlayer.netId)
+            // {
+            //     prev = curr;
+            //     curr = curr.NextPlayer;
+            // }
+            //
+            // prev.NextPlayer = curr.NextPlayer;
         }
 
         [ClientRpc]
@@ -161,7 +172,7 @@ namespace GameControl
             foreach (var player in players.Values)
             {
                 player.UpdateInfo();
-            } 
+            }
         }
 
         public void EndPlayerTurn()
@@ -175,6 +186,7 @@ namespace GameControl
         {
             if (playerId != currentPlayersTurn) return;
             currentPlayersTurn = CurrentPlayer.NextPlayer.netId;
+            RpcPlayerResetAndUpdate();
 
             if (players.Count == 1)
             {
@@ -182,9 +194,33 @@ namespace GameControl
             }
         }
 
+
+        [ClientRpc]
+        public void RpcPlayerResetAndUpdate()
+        {
+            foreach (var player in players.Values)
+            {
+                player.LastChange = 0;
+                player.UpdateInfo();
+            }
+        }
+
         public Player GetPlayerWithId(uint playerId)
         {
             return players[playerId];
+        }
+
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.Escape))
+            {
+                exitConfirmation.SetActive(true);
+            }
+        }
+
+        public void OnExitConfirmation()
+        {
+            NetworkManager.singleton.StopClient();
         }
     }
 }

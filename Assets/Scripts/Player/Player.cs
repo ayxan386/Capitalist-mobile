@@ -10,6 +10,7 @@ public class Player : NetworkBehaviour
 {
     [SerializeField] private RectTransform playerDisplay;
     [SerializeField] private PlayerInfoDisplayer infoDisplayPrefab;
+    [SerializeField] private AudioClip moneyChangeSound;
     private PlayerInfoDisplayer infoDisplay;
 
     [SyncVar(hook = nameof(OnPositionChanged))]
@@ -32,6 +33,9 @@ public class Player : NetworkBehaviour
     public RectTransform DisplayEnt { get; private set; }
 
     public Player NextPlayer { get; set; }
+    public Player PrevPlayer { get; set; }
+
+    public int LastChange { get; set; }
 
     private static TileVariant[] boardData;
     public static Action<int> PlayerOwnedMoneyChanged;
@@ -115,6 +119,11 @@ public class Player : NetworkBehaviour
 
     private void OnOwnedMoneyChanged(int old, int current)
     {
+        LastChange = current - old;
+        if (isOwned)
+        {
+            PlayerManager.Instance.SfxSource.PlayOneShot(moneyChangeSound);
+        }
         UpdateInfo();
     }
 
