@@ -17,7 +17,7 @@ public class PlayerInfoDisplayer : MonoBehaviour
         profilePicture.color = player.displayColor;
         displayName.text = player.DisplayName;
         ownedMoney.text = $"${player.OwnedMoney}";
-        moneyChangeText.text = $"${player.LastChange}";
+        moneyChangeText.text = $"{(player.LastChange > 0 ? "+" : "-")}${Mathf.Abs(player.LastChange)}";
         moneyChangeText.color = player.LastChange > 0 ? positiveChange : negativeChange;
         moneyChangeText.alpha = player.LastChange != 0 ? 1 : 0;
     }

@@ -119,7 +119,7 @@ public class Player : NetworkBehaviour
 
     private void OnOwnedMoneyChanged(int old, int current)
     {
-        LastChange = current - old;
+        LastChange += current - old;
         if (isOwned)
         {
             PlayerManager.Instance.SfxSource.PlayOneShot(moneyChangeSound);
