@@ -12,6 +12,7 @@ namespace GameControl.helpers
         [SerializeField] private Vector3 rotationSpeed;
         [SerializeField] private GameObject diceRollBackground;
         [SerializeField] private Button endTurnButton;
+        [SerializeField] private Vector2Int rollRange = new Vector2Int(1, 7);
 
         public static DiceRollHelper Instance { get; private set; }
 
@@ -36,7 +37,8 @@ namespace GameControl.helpers
         [Command(requiresAuthority = false)]
         private void CmdRollDice()
         {
-            var diceRoll = Random.Range(1, 7);
+            // var diceRoll = Random.Range(rollRange.x, rollRange.y);
+            var diceRoll = 2;
             RpcDiceRolled(diceRoll);
         }
 
@@ -51,27 +53,22 @@ namespace GameControl.helpers
         {
             diceRollText.text = diceRoll.ToString();
             var beforeAnimationPlayer = PlayerManager.Instance.CurrentPlayer;
-            for (int i = 0; i < 45; i++)
+            beforeAnimationPlayer.eventMove = false;
+            int duration = (int)(1 / Time.deltaTime) * 3 / 4;
+            print("Animation duration is " + duration);
+            for (int i = 0; i < duration; i++)
             {
-                diceRollBackground.transform.Rotate(rotationSpeed);
-                yield return new WaitForEndOfFrame();
+                diceRollBackground.transform.Rotate(rotationSpeed * (60 * Time.deltaTime));
+                yield return null;
             }
 
             diceRollBackground.transform.rotation = Quaternion.identity;
             if (beforeAnimationPlayer.isOwned)
             {
-                StartCoroutine(MovePlayer(diceRoll, beforeAnimationPlayer));
+                PlayerMovementHelper.Instance.CmdAnimatedMoveToTile(
+                    TilePlacer.Instance.CalculatePosition(beforeAnimationPlayer.Position, diceRoll));
+                endTurnButton.interactable = true;
             }
-        }
-
-        private IEnumerator MovePlayer(int diceRoll, Player player)
-        {
-            for (int i = 0; i < diceRoll; i++)
-            {
-                player.CmdUpdatePosition(TilePlacer.Instance.CalculatePosition(player.Position, 1));
-                yield return new WaitForSeconds(0.3f);
-            }
-            endTurnButton.interactable = true;
         }
     }
 }

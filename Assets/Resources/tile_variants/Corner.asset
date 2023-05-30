@@ -15,4 +15,8 @@ MonoBehaviour:
   displayName: Corner
   icon: {fileID: 0}
   spriteColor: {r: 0, g: 0, b: 0, a: 1}
-  cost: 15
+  cost: 9999
+  fee: 0
+  description: Government building
+  government: 1
+  extraEvents: {fileID: 0}

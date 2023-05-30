@@ -1,8 +1,12 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using GameControl.helpers;
+using Mirror;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class TilePlacer : MonoBehaviour
+public class TilePlacer : NetworkBehaviour
 {
     [SerializeField] private TileDisplayer tileDisplayerPrefabHorizontal;
     [SerializeField] private TileDisplayer tileDisplayerPrefabVertical;
@@ -17,34 +21,94 @@ public class TilePlacer : MonoBehaviour
     [SerializeField] private Transform topRow;
     [SerializeField] private Transform[] corners;
     [SerializeField] private TileVariant[] cornerTiles;
-
+    [SerializeField] private DetailedTileDisplayer detailedTileDisplayer;
+    [SerializeField] private Transform extrasParent;
     [SerializeField] private TileVariantSelectionData[] selectionDatas;
+
+    [Header("SFX")] [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip randomSelectionClip;
+
+    private TileData[] tileDatas;
+    private Dictionary<string, TileVariant> allTiles;
 
     public TileDisplayer[] Tiles { get; private set; }
     public static TilePlacer Instance { get; private set; }
 
     public static bool IsInitializeComplete { get; private set; }
+    public static Action<int> OnTileSold;
 
     private void Awake()
     {
         Instance = this;
+        allTiles = new Dictionary<string, TileVariant>();
+        foreach (var selectionData in selectionDatas)
+        {
+            allTiles.Add(selectionData.tileVariant.displayName, selectionData.tileVariant);
+        }
+
+        foreach (var selectionData in cornerTiles)
+        {
+            if (!allTiles.ContainsKey(selectionData.displayName))
+                allTiles.Add(selectionData.displayName, selectionData);
+        }
     }
 
-    public void PlaceTiles(TileVariant[] data)
+    public void PlaceTiles(string[] data)
     {
         if (Tiles != null) return;
         ;
         var totalCount = CalculateTotalCount();
         Tiles = new TileDisplayer[totalCount];
-        for (int i = 0; i < data.Length; i++)
+
+        tileDatas = new TileData[data.Length];
+
+        for (var index = 0; index < data.Length; index++)
+        {
+            var tileVariant = allTiles[data[index]];
+            tileDatas[index] = new TileData(tileVariant, index);
+            print($"tile at {index} has {tileVariant.extraEvents}");
+            if (tileVariant.extraEvents != null)
+            {
+                print("Creating extra event object");
+                tileDatas[index].extraEvent =
+                    Instantiate(tileVariant.extraEvents, extrasParent).GetComponent<BaseTile>();
+            }
+        }
+
+        for (int i = 0; i < tileDatas.Length; i++)
         {
             var holder = FindHolder(i);
             Tiles[i] = Instantiate(FindPrefab(holder), holder);
-            Tiles[i].Display(data[i]);
+            Tiles[i].Display(tileDatas[i]);
         }
 
+
+        TileDisplayer.OnTileClick += TileDisplayerOnClick;
+        Player.OnPlayerDespawned += OnPlayerDespawned;
         IsInitializeComplete = true;
         print("Board tiles placed");
+    }
+
+    private void OnPlayerDespawned(Player obj)
+    {
+        foreach (var tileData in tileDatas)
+        {
+            if (tileData.isOwned && tileData.ownerId == obj.netId)
+            {
+                tileData.isOwned = false;
+                tileData.ownerId = 0;
+            }
+        }
+    }
+
+    private void TileDisplayerOnClick(TileData obj)
+    {
+        detailedTileDisplayer.Display(obj);
+    }
+
+    public void UpdateTileDetails(int position)
+    {
+        detailedTileDisplayer.IfSameThenDisplay(tileDatas[position]);
     }
 
     private Transform FindHolder(int i)
@@ -151,8 +215,81 @@ public class TilePlacer : MonoBehaviour
         k = GenerateTileVariantForSection(k, 1, cornerTiles[2], res);
         k = GenerateTileVariantForSection(k, numberOfTiles.y, null, res);
         k = GenerateTileVariantForSection(k, 1, cornerTiles[3], res);
-        k = GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+        GenerateTileVariantForSection(k, numberOfTiles.x, null, res);
+
         return res;
+    }
+
+    [ClientRpc]
+    public void RpcBoughtTile(int dataPosition, uint ownerId)
+    {
+        var tileData = tileDatas[dataPosition];
+        tileData.isOwned = true;
+        tileData.ownerId = ownerId;
+        detailedTileDisplayer.IfSameThenDisplay(tileData);
+    }
+
+    [ClientRpc]
+    public void RpcAnimatedSelection(int selectedPos)
+    {
+        StartCoroutine(AnimateSelection(selectedPos));
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdUpgradedTile(int position, int newFee)
+    {
+        RpcUpgradedTile(position, newFee);
+    }
+
+    [ClientRpc]
+    private void RpcUpgradedTile(int position, int newFee)
+    {
+        tileDatas[position].fee = newFee;
+    }
+
+    private IEnumerator AnimateSelection(int selectedPos)
+    {
+        audioSource.PlayOneShot(randomSelectionClip);
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < Tiles.Length; j++)
+            {
+                Tiles[j].Highlight();
+                yield return new WaitForSeconds(0.1f);
+                Tiles[j].CancelHighlight();
+            }
+        }
+
+        for (int i = 0; i < selectedPos; i++)
+        {
+            Tiles[i].Highlight();
+            yield return new WaitForSeconds(0.1f);
+            Tiles[i].CancelHighlight();
+        }
+
+        Tiles[selectedPos].Highlight();
+        PlayerMovementHelper.Instance.CmdAnimationComplete();
+        yield return new WaitForSeconds(1.2f);
+        Tiles[selectedPos].CancelHighlight();
+    }
+
+    public TileData GetTileAt(int tilePosition)
+    {
+        return tileDatas[tilePosition];
+    }
+
+    public List<TileData> GetTilesOwnedBy(Player player)
+    {
+        return new List<TileData>(tileDatas).FindAll(tile => tile.isOwned && tile.ownerId == player.netId);
+    }
+
+    [ClientRpc]
+    public void RpcSoldTile(int tilePosition)
+    {
+        var tileData = tileDatas[tilePosition];
+        tileData.isOwned = false;
+        detailedTileDisplayer.IfSameThenDisplay(tileData);
+        OnTileSold?.Invoke(tilePosition);
     }
 }
 
@@ -163,5 +300,30 @@ public class TileVariantSelectionData
     public TileVariant tileVariant;
 
     public float chance;
-    // public bool used;
+}
+
+public class TileData
+{
+    public Guid id;
+    public TileVariant baseTile;
+    public bool isOwned;
+    public uint ownerId;
+    public int position;
+    public BaseTile extraEvent;
+    public int fee;
+
+    public TileData(TileVariant baseTile, int position)
+    {
+        this.baseTile = baseTile;
+        this.position = position;
+        fee = baseTile.fee;
+        id = Guid.NewGuid();
+        isOwned = false;
+    }
+
+
+    public int CalculateTilePrice()
+    {
+        return (int)(((fee - baseTile.fee) * 15 + baseTile.cost) * (1 + Random.Range(-0.1f, 0.1f)));
+    }
 }
