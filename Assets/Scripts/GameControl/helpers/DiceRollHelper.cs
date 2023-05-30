@@ -37,8 +37,8 @@ namespace GameControl.helpers
         [Command(requiresAuthority = false)]
         private void CmdRollDice()
         {
-            var diceRoll = Random.Range(rollRange.x, rollRange.y);
-            // var diceRoll = 5;
+            // var diceRoll = Random.Range(rollRange.x, rollRange.y);
+            var diceRoll = 2;
             RpcDiceRolled(diceRoll);
         }
 

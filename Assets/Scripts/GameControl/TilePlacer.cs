@@ -35,6 +35,7 @@ public class TilePlacer : NetworkBehaviour
     public static TilePlacer Instance { get; private set; }
 
     public static bool IsInitializeComplete { get; private set; }
+    public static Action<int> OnTileSold;
 
     private void Awake()
     {
@@ -276,6 +277,15 @@ public class TilePlacer : NetworkBehaviour
     {
         return new List<TileData>(tileDatas).FindAll(tile => tile.isOwned && tile.ownerId == player.netId);
     }
+
+    [ClientRpc]
+    public void RpcSoldTile(int tilePosition)
+    {
+        var tileData = tileDatas[tilePosition];
+        tileData.isOwned = false;
+        detailedTileDisplayer.IfSameThenDisplay(tileData);
+        OnTileSold?.Invoke(tilePosition);
+    }
 }
 
 
@@ -285,7 +295,6 @@ public class TileVariantSelectionData
     public TileVariant tileVariant;
 
     public float chance;
-    // public bool used;
 }
 
 public class TileData
@@ -305,5 +314,11 @@ public class TileData
         fee = baseTile.fee;
         id = Guid.NewGuid();
         isOwned = false;
+    }
+
+
+    public int CalculateTilePrice()
+    {
+        return (int)(((fee - baseTile.fee) * 15 + baseTile.cost) * (1 + Random.Range(-0.1f, 0.1f)));
     }
 }

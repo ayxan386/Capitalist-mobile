@@ -27,6 +27,8 @@ public class Player : NetworkBehaviour
     [SyncVar(hook = nameof(OnColorChanged))]
     public Color displayColor;
 
+    private bool canPay;
+
     public int OwnedMoney => ownedMoney;
     public int Position => position;
     public string DisplayName => displayName;
@@ -64,6 +66,7 @@ public class Player : NetworkBehaviour
         if (isOwned)
         {
             PlayerOwnedMoneyChanged += UpdatePlayerOwnedMoney;
+            PropertySellHelper.OnPropertyAction += OnPropertyAction;
         }
     }
 
@@ -124,6 +127,7 @@ public class Player : NetworkBehaviour
         {
             PlayerManager.Instance.SfxSource.PlayOneShot(moneyChangeSound);
         }
+
         UpdateInfo();
     }
 
@@ -209,10 +213,14 @@ public class Player : NetworkBehaviour
         print($"Checking {DisplayName} position {Position} with tile {tileData.baseTile.displayName}");
         if (!tileData.baseTile.government && tileData.isOwned && tileData.ownerId != netId)
         {
-            var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
             var fee = tileData.fee;
-            otherPlayer.ServerSideOnlyUpdateMoney(fee);
-            ownedMoney -= fee;
+            canPay = OwnedMoney >= fee;
+            if (!canPay)
+            {
+                PropertySellHelper.Instance.RpcSellMyProperties(netId, fee);
+            }
+
+            StartCoroutine(WaitForPlayerHasMoney(tileData));
         }
         else
         {
@@ -224,6 +232,27 @@ public class Player : NetworkBehaviour
         }
     }
 
+    private void OnPropertyAction(bool res)
+    {
+        if (!res)
+        {
+            PlayerManager.Instance.OnExitConfirmation();
+        }
+        else
+        {
+            canPay = true;
+        }
+    }
+
+    private IEnumerator WaitForPlayerHasMoney(TileData tileData)
+    {
+        var fee = tileData.fee;
+        yield return new WaitUntil(() => ownedMoney >= fee);
+        var otherPlayer = PlayerManager.Instance.GetPlayerWithId(tileData.ownerId);
+        otherPlayer.ServerSideOnlyUpdateMoney(fee);
+        ownedMoney -= fee;
+    }
+
     [ClientRpc]
     private void RpcCheckTile()
     {
@@ -232,5 +261,17 @@ public class Player : NetworkBehaviour
 
         var tileData = TilePlacer.Instance.GetTileAt(Position);
         tileData.extraEvent.PlayerArrived(this, tileData);
+    }
+
+    [Command(requiresAuthority = false)]
+    public void CmdSellTile(int tilePosition, bool willEarnEnough)
+    {
+        var tileData = TilePlacer.Instance.GetTileAt(tilePosition);
+        if (tileData.isOwned && tileData.ownerId == netId)
+        {
+            ownedMoney += tileData.CalculateTilePrice();
+            TilePlacer.Instance.RpcSoldTile(tilePosition);
+            canPay = willEarnEnough;
+        }
     }
 }
