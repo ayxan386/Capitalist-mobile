@@ -106,6 +106,11 @@ public class TilePlacer : NetworkBehaviour
         detailedTileDisplayer.Display(obj);
     }
 
+    public void UpdateTileDetails(int position)
+    {
+        detailedTileDisplayer.IfSameThenDisplay(tileDatas[position]);
+    }
+
     private Transform FindHolder(int i)
     {
         if (i > 0 && i <= numberOfTiles.y)

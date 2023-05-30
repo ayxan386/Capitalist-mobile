@@ -118,6 +118,7 @@ public class Player : NetworkBehaviour
 
         print($"Placing player: {DisplayName} with id {netId} at position {current}");
         UpdateInfo();
+        TilePlacer.Instance.UpdateTileDetails(current);
     }
 
     private void OnOwnedMoneyChanged(int old, int current)
