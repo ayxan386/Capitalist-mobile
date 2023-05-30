@@ -220,7 +220,10 @@ namespace GameControl
 
         public void OnExitConfirmation()
         {
-            NetworkManager.singleton.StopClient();
+            if (isServer)
+                NetworkManager.singleton.StopHost();
+            else
+                NetworkManager.singleton.StopClient();
         }
     }
 }

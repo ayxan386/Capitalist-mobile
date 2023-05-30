@@ -12,28 +12,51 @@ public class TeleportationCorner : BaseTile
     private Button randomButton;
     private Button selectionButton;
     private Player ownedPlayer;
+    private GameObject teleportationConfirmationMenu;
+    private TileData lastClickedTile;
+    private Button confirmButton;
 
     private void Start()
     {
         teleportationOptionsMenu = GameObject.Find("TeleportationOptionsMenu");
         randomButton = teleportationOptionsMenu.transform.Find("RandomButton").GetComponent<Button>();
-        randomButton.onClick
-            .AddListener(RandomTeleportation);
+        randomButton.onClick.AddListener(RandomTeleportation);
         selectionButton = teleportationOptionsMenu.transform.Find("SelectedTeleport").GetComponent<Button>();
         selectionButton.onClick.AddListener(SelectedTeleportation);
+        teleportationConfirmationMenu = GameObject.Find("TeleportationConfirmation");
+        confirmButton = teleportationConfirmationMenu.transform.Find("Confirm").GetComponent<Button>();
+        confirmButton.interactable = false;
+        confirmButton.onClick.AddListener(ConfirmTeleportation);
+    }
+
+    private void ConfirmTeleportation()
+    {
+        confirmButton.interactable = false;
+        TilePlacer.Instance.Tiles[lastClickedTile.position].CancelHighlight();
+        PlayerMovementHelper.Instance.CmdDirectMoveToTile(lastClickedTile.position);
+        teleportationConfirmationMenu.transform.localScale = Vector3.zero;
+        lastClickedTile = null;
+        TileDisplayer.OnTileClick -= OnTileClick;
     }
 
     private void SelectedTeleportation()
     {
         teleportationOptionsMenu.transform.localScale = Vector3.zero;
+        teleportationConfirmationMenu.transform.localScale = Vector3.one;
         ownedPlayer.CmdUpdateOwnedMoney(ownedPlayer.OwnedMoney - selectedCost);
         TileDisplayer.OnTileClick += OnTileClick;
     }
 
     private void OnTileClick(TileData obj)
     {
-        PlayerMovementHelper.Instance.CmdDirectMoveToTile(obj.position);
-        TileDisplayer.OnTileClick -= OnTileClick;
+        if (lastClickedTile != null)
+        {
+            TilePlacer.Instance.Tiles[lastClickedTile.position].CancelHighlight();
+        }
+
+        TilePlacer.Instance.Tiles[obj.position].Highlight();
+        confirmButton.interactable = true;
+        lastClickedTile = obj;
     }
 
     private void RandomTeleportation()
