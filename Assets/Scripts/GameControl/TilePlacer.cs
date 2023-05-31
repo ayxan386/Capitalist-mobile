@@ -56,7 +56,6 @@ public class TilePlacer : NetworkBehaviour
     public void PlaceTiles(string[] data)
     {
         if (Tiles != null) return;
-        ;
         var totalCount = CalculateTotalCount();
         Tiles = new TileDisplayer[totalCount];
 
@@ -108,7 +107,8 @@ public class TilePlacer : NetworkBehaviour
 
     public void UpdateTileDetails(int position)
     {
-        detailedTileDisplayer.IfSameThenDisplay(tileDatas[position]);
+        if (detailedTileDisplayer != null && tileDatas != null)
+            detailedTileDisplayer.IfSameThenDisplay(tileDatas[position]);
     }
 
     private Transform FindHolder(int i)
@@ -205,6 +205,7 @@ public class TilePlacer : NetworkBehaviour
 
     public TileVariant[] GenerateBoardData()
     {
+        print("Generating board data ");
         NormalizeTileChances();
         var res = new TileVariant[CalculateTotalCount()];
         int k = 0;
@@ -238,13 +239,14 @@ public class TilePlacer : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdUpgradedTile(int position, int newFee)
     {
-        RpcUpgradedTile(position, newFee);
+        RpcUpgradedTile(position, newFee, tileDatas[position].CalculateTilePrice());
     }
 
     [ClientRpc]
-    private void RpcUpgradedTile(int position, int newFee)
+    private void RpcUpgradedTile(int position, int newFee, int sellPrice)
     {
         tileDatas[position].fee = newFee;
+        tileDatas[position].sellPrice = sellPrice;
     }
 
     private IEnumerator AnimateSelection(int selectedPos)
@@ -283,6 +285,12 @@ public class TilePlacer : NetworkBehaviour
         return new List<TileData>(tileDatas).FindAll(tile => tile.isOwned && tile.ownerId == player.netId);
     }
 
+    public List<TileData> GetTilesOwnedBy(uint player)
+    {
+        return new List<TileData>(tileDatas).FindAll(tile => tile.isOwned && tile.ownerId == player);
+    }
+
+
     [ClientRpc]
     public void RpcSoldTile(int tilePosition)
     {
@@ -311,16 +319,17 @@ public class TileData
     public int position;
     public BaseTile extraEvent;
     public int fee;
+    public int sellPrice;
 
     public TileData(TileVariant baseTile, int position)
     {
         this.baseTile = baseTile;
         this.position = position;
-        fee = baseTile.fee;
+        fee = baseTile.fee * 20;
         id = Guid.NewGuid();
         isOwned = false;
+        sellPrice = baseTile.cost;
     }
-
 
     public int CalculateTilePrice()
     {

@@ -25,7 +25,7 @@ namespace GameControl.helpers
 
         public void DiceRollButtonCall()
         {
-            if (!PlayerManager.IsGameStarted || !CanRoll) return;
+            if (!PlayerManager.Instance.IsGameStarted || !CanRoll) return;
             var player = PlayerManager.Instance.CurrentPlayer;
             if (player.isOwned)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using GameControl;
 using Mirror;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class PropertySellHelper : NetworkBehaviour
     [SerializeField] private GameObject sellMenu;
     [SerializeField] private Transform propertyHolder;
     [SerializeField] private TileDisplayer propertyPrefab;
+    [SerializeField] private PropertySellDetailes propertySellDetailes;
     public static PropertySellHelper Instance { get; private set; }
 
     public static Action<bool> OnPropertyAction;
@@ -32,12 +34,19 @@ public class PropertySellHelper : NetworkBehaviour
             return;
         }
 
+        sellMenu.transform.localScale = Vector3.one;
+        UpdateUI(ownedTiles);
+
+        propertySellDetailes.Display(ownedTiles[0]);
+    }
+
+    private void UpdateUI(List<TileData> ownedTiles)
+    {
         for (int i = 0; i < propertyHolder.childCount; i++)
         {
             Destroy(propertyHolder.GetChild(i).gameObject);
         }
 
-        sellMenu.transform.localScale = Vector3.one;
 
         foreach (var ownedTile in ownedTiles)
         {
@@ -52,14 +61,13 @@ public class PropertySellHelper : NetworkBehaviour
 
     public void PropertySellClicked(TileData data)
     {
-        requiredAmount -= data.CalculateTilePrice();
+        requiredAmount -= data.sellPrice;
         if (requiredAmount <= 0)
         {
-            OnPropertyAction?.Invoke(true);
             sellMenu.transform.localScale = Vector3.zero;
         }
 
         var player = PlayerManager.Instance.GetPlayerWithId(data.ownerId);
-        player.CmdSellTile(data.position, requiredAmount <= 0);
+        player.CmdSellTile(data.position, requiredAmount);
     }
 }

@@ -31,7 +31,7 @@ public class PropertySellDetailes : MonoBehaviour
         iconBackground.color = baseTile.spriteColor;
         displayName.text = "Name: " + baseTile.displayName;
         description.text = baseTile.description + "\n Fee: " + data.fee;
-        sellButtonText.text = "$" + data.CalculateTilePrice();
+        sellButtonText.text = "$" + data.sellPrice;
     }
 
 

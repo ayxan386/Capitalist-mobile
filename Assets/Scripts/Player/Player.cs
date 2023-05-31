@@ -12,7 +12,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private PlayerInfoDisplayer infoDisplayPrefab;
     [SerializeField] private AudioClip moneyChangeSound;
     [SerializeField] private Sprite[] characterPics;
-    
+
     private PlayerInfoDisplayer infoDisplay;
 
     [SyncVar(hook = nameof(OnPositionChanged))]
@@ -28,7 +28,7 @@ public class Player : NetworkBehaviour
 
     [SyncVar(hook = nameof(OnColorChanged))]
     private Color displayColor;
-    
+
     [SyncVar(hook = nameof(OnIndexChanged))]
     private int pictureIndex;
 
@@ -56,16 +56,19 @@ public class Player : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-
+        print("Client started ");
         if (isServer)
         {
-            boardData ??= TilePlacer.Instance.GenerateBoardData();
+            print("Client is also server ");
+            boardData = TilePlacer.Instance.GenerateBoardData();
+
             var tileNames = new string[boardData.Length];
             for (int i = 0; i < boardData.Length; i++)
             {
                 tileNames[i] = boardData[i].displayName;
             }
 
+            print("Telling client to display board");
             RpcDisplayBoard(tileNames);
         }
 
@@ -102,7 +105,7 @@ public class Player : NetworkBehaviour
         }
 
         OnPositionChanged(0, 0);
-        
+
         if (isOwned)
         {
             ChooseRandomProfile();
@@ -124,6 +127,7 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void RpcDisplayBoard(string[] boardData)
     {
+        print("Client side: placing board tiles");
         TilePlacer.Instance.PlaceTiles(boardData);
     }
 
@@ -136,7 +140,7 @@ public class Player : NetworkBehaviour
 
         print($"Placing player: {DisplayName} with id {netId} at position {current}");
         UpdateInfo();
-        TilePlacer.Instance.UpdateTileDetails(current);
+        TilePlacer.Instance?.UpdateTileDetails(current);
     }
 
     private void OnOwnedMoneyChanged(int old, int current)
@@ -156,8 +160,9 @@ public class Player : NetworkBehaviour
         UpdateInfo();
     }
 
-    public void UpdatePositionServerSide(int newPos)
+    public void UpdatePositionServerSide(int newPos, bool eventMovePass = false)
     {
+        eventMove = eventMovePass;
         position = newPos;
     }
 
@@ -166,7 +171,7 @@ public class Player : NetworkBehaviour
     {
         ownedMoney = amount;
     }
-    
+
     [Command]
     private void CmdUpdateProfileIndex(int index)
     {
@@ -186,8 +191,10 @@ public class Player : NetworkBehaviour
             PlayerManager.Instance.PlayerColor.color = curr;
             PlayerManager.Instance.PlayerColor.sprite = characterPics[pictureIndex];
         }
+
         UpdateInfo();
     }
+
     private void OnIndexChanged(int old, int curr)
     {
         print($"Index changed {netId} from {old} to {curr}");
@@ -196,7 +203,7 @@ public class Player : NetworkBehaviour
             PlayerManager.Instance.PlayerColor.color = displayColor;
             PlayerManager.Instance.PlayerColor.sprite = characterPics[curr];
         }
-        
+
         UpdateInfo();
     }
 
@@ -222,10 +229,8 @@ public class Player : NetworkBehaviour
 
         if (TilePlacer.Instance != null && TilePlacer.Instance.Tiles != null)
         {
-            
             TilePlacer.Instance.Tiles[Position].PlacePlayer(this);
         }
-
     }
 
     public bool CanBuyTile(Player player, TileData tileData)
@@ -304,14 +309,19 @@ public class Player : NetworkBehaviour
     }
 
     [Command(requiresAuthority = false)]
-    public void CmdSellTile(int tilePosition, bool willEarnEnough)
+    public void CmdSellTile(int tilePosition, int remainingAmount)
     {
         var tileData = TilePlacer.Instance.GetTileAt(tilePosition);
         if (tileData.isOwned && tileData.ownerId == netId)
         {
-            ownedMoney += tileData.CalculateTilePrice();
+            ownedMoney += tileData.sellPrice;
             TilePlacer.Instance.RpcSoldTile(tilePosition);
-            canPay = willEarnEnough;
+            canPay = remainingAmount <= 0;
+        }
+
+        if (!canPay)
+        {
+            PropertySellHelper.Instance.RpcSellMyProperties(netId, remainingAmount);
         }
     }
 }

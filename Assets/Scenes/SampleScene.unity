@@ -2600,6 +2600,7 @@ MonoBehaviour:
   sellMenu: {fileID: 476709437}
   propertyHolder: {fileID: 2032833784}
   propertyPrefab: {fileID: 2539671055868718955, guid: 93a3c7f6cc3340d4dbdbfb0734d0f184, type: 3}
+  propertySellDetailes: {fileID: 1199568159409526832}
 --- !u!114 &575645676
 MonoBehaviour:
   m_ObjectHideFlags: 0

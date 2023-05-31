@@ -30,13 +30,13 @@ namespace GameControl
         [SerializeField] private AudioSource soundSource;
         [SerializeField] private GameObject exitConfirmation;
 
-        private Dictionary<uint, Player> players = new();
+        private Dictionary<uint, Player> players;
         private int totalNumberOfReadyPlayers;
 
         [SyncVar(hook = nameof(OnTurnChanged))]
         private uint currentPlayersTurn;
 
-        public static bool IsGameStarted { get; private set; }
+        public bool IsGameStarted { get; private set; }
         public static PlayerManager Instance { get; private set; }
 
         public AudioSource SfxSource => soundSource;
@@ -56,12 +56,20 @@ namespace GameControl
         private void Awake()
         {
             Instance = this;
+            players = new Dictionary<uint, Player>();
+            totalNumberOfReadyPlayers = 0;
         }
 
         private void Start()
         {
             Player.OnPlayerSpawned += OnPlayerSpawned;
             Player.OnPlayerDespawned += OnPlayerDespawned;
+        }
+
+        private void OnDisable()
+        {
+            Player.OnPlayerSpawned -= OnPlayerSpawned;
+            Player.OnPlayerDespawned -= OnPlayerDespawned;
         }
 
 
@@ -164,7 +172,8 @@ namespace GameControl
             }
 
             players.Remove(disconnectedPlayer.netId);
-            disconnectedPlayer.PrevPlayer.NextPlayer = disconnectedPlayer.NextPlayer;
+            if (disconnectedPlayer && disconnectedPlayer.PrevPlayer)
+                disconnectedPlayer.PrevPlayer.NextPlayer = disconnectedPlayer.NextPlayer;
         }
 
         [ClientRpc]

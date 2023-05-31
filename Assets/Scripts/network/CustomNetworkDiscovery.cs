@@ -63,13 +63,18 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
                 serverId = ServerId,
                 uri = transport.ServerUri(),
                 numberOfPlayers = NetworkManager.singleton.numPlayers,
-                canJoin = PlayerManager.Instance != null && !PlayerManager.IsGameStarted,
+                canJoin = PlayerManager.Instance != null && !PlayerManager.Instance.IsGameStarted,
                 hostName = SystemInfo.deviceName
             };
         }
         catch (NotImplementedException)
         {
             Debug.LogError($"Transport {transport} does not support network discovery");
+            throw;
+        }
+        catch (NullReferenceException)
+        {
+            Debug.LogError("Some useless error");
             throw;
         }
     }
