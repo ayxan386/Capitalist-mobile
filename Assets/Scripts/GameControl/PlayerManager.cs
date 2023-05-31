@@ -68,14 +68,23 @@ namespace GameControl
         private void OnTurnChanged(uint prevPlayerId, uint nextPlayerId)
         {
             CurrentPlayer.UpdateInfo();
-            currentPlayersTurn = nextPlayerId;
+            // currentPlayersTurn = nextPlayerId;
             var player = players[nextPlayerId];
             DiceRollHelper.Instance.CanRoll = player.isOwned;
-            turnIndicatorText.text = $"{player.DisplayName} turn";
+            UpdateTurnIndicator();
 
             if (player.isOwned)
             {
                 Handheld.Vibrate();
+            }
+        }
+
+        public void UpdateTurnIndicator()
+        {
+            if (players.ContainsKey(currentPlayersTurn))
+            {
+                var player = players[currentPlayersTurn];
+                turnIndicatorText.text = $"{player.DisplayName} turn";
             }
         }
 
@@ -143,6 +152,8 @@ namespace GameControl
             prevPlayer.NextPlayer = newPlayer;
             newPlayer.PrevPlayer = prevPlayer;
             prevPlayer = newPlayer;
+
+            ResetAndUpdate();
         }
 
         private void OnPlayerDespawned(Player disconnectedPlayer)
@@ -154,15 +165,6 @@ namespace GameControl
 
             players.Remove(disconnectedPlayer.netId);
             disconnectedPlayer.PrevPlayer.NextPlayer = disconnectedPlayer.NextPlayer;
-            // var curr = firstPlayer;
-            // var prev = curr;
-            // while (curr.netId != disconnectedPlayer.netId && curr.NextPlayer.netId != firstPlayer.netId)
-            // {
-            //     prev = curr;
-            //     curr = curr.NextPlayer;
-            // }
-            //
-            // prev.NextPlayer = curr.NextPlayer;
         }
 
         [ClientRpc]
@@ -197,6 +199,11 @@ namespace GameControl
 
         [ClientRpc]
         public void RpcPlayerResetAndUpdate()
+        {
+            ResetAndUpdate();
+        }
+
+        private void ResetAndUpdate()
         {
             foreach (var player in players.Values)
             {

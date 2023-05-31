@@ -11,6 +11,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private RectTransform playerDisplay;
     [SerializeField] private PlayerInfoDisplayer infoDisplayPrefab;
     [SerializeField] private AudioClip moneyChangeSound;
+    [SerializeField] private Sprite[] characterPics;
+    
     private PlayerInfoDisplayer infoDisplay;
 
     [SyncVar(hook = nameof(OnPositionChanged))]
@@ -25,7 +27,10 @@ public class Player : NetworkBehaviour
     [SyncVar] public bool eventMove;
 
     [SyncVar(hook = nameof(OnColorChanged))]
-    public Color displayColor;
+    private Color displayColor;
+    
+    [SyncVar(hook = nameof(OnIndexChanged))]
+    private int pictureIndex;
 
     private bool canPay;
 
@@ -37,10 +42,13 @@ public class Player : NetworkBehaviour
     public Player NextPlayer { get; set; }
     public Player PrevPlayer { get; set; }
 
+    public Sprite ProfilePicture => characterPics[pictureIndex];
+
+    public Color DisplayColor => displayColor;
+
     public int LastChange { get; set; }
 
     private static TileVariant[] boardData;
-    public static Action<int> PlayerOwnedMoneyChanged;
     public static Action<Player> OnPlayerSpawned;
     public static Action<Player> OnPlayerDespawned;
 
@@ -65,7 +73,6 @@ public class Player : NetworkBehaviour
         StartCoroutine(WaitForBoardThenPlace());
         if (isOwned)
         {
-            PlayerOwnedMoneyChanged += UpdatePlayerOwnedMoney;
             PropertySellHelper.OnPropertyAction += OnPropertyAction;
         }
     }
@@ -87,9 +94,6 @@ public class Player : NetworkBehaviour
         if (isOwned)
         {
             infoDisplay = PlayerManager.Instance.SelfPlayersDisplayer.GetComponent<PlayerInfoDisplayer>();
-            var temp = Random.ColorHSV(0, 1, 0.8f, 1f, 0.6f, 1f);
-            temp.a = 1;
-            CmdUpdateColor(temp);
         }
         else
         {
@@ -98,9 +102,23 @@ public class Player : NetworkBehaviour
         }
 
         OnPositionChanged(0, 0);
-        CmdUpdateOwnedMoney(GlobalConstants.StartingMoney);
+        
+        if (isOwned)
+        {
+            ChooseRandomProfile();
+            CmdUpdateOwnedMoney(GlobalConstants.StartingMoney);
+        }
 
         OnPlayerSpawned?.Invoke(this);
+        UpdateInfo();
+    }
+
+    private void ChooseRandomProfile()
+    {
+        var temp = Random.ColorHSV(0, 1, 0.8f, 1f, 0.6f, 1f);
+        temp.a = 1;
+        CmdUpdateColor(temp);
+        CmdUpdateProfileIndex(Random.Range(0, characterPics.Length));
     }
 
     [ClientRpc]
@@ -113,7 +131,7 @@ public class Player : NetworkBehaviour
     {
         if (isOwned && !eventMove && old > current)
         {
-            PlayerOwnedMoneyChanged?.Invoke(GlobalConstants.RoundSalary);
+            CmdUpdateOwnedMoney(OwnedMoney + GlobalConstants.RoundSalary);
         }
 
         print($"Placing player: {DisplayName} with id {netId} at position {current}");
@@ -134,13 +152,8 @@ public class Player : NetworkBehaviour
 
     private void OnDisplayNameChanged(string old, string current)
     {
+        PlayerManager.Instance.UpdateTurnIndicator();
         UpdateInfo();
-    }
-
-    [Command]
-    public void CmdUpdatePosition(int newPos)
-    {
-        position = newPos;
     }
 
     public void UpdatePositionServerSide(int newPos)
@@ -153,19 +166,38 @@ public class Player : NetworkBehaviour
     {
         ownedMoney = amount;
     }
+    
+    [Command]
+    private void CmdUpdateProfileIndex(int index)
+    {
+        pictureIndex = index;
+    }
 
     [Command]
-    public void CmdUpdateColor(Color color)
+    private void CmdUpdateColor(Color color)
     {
         displayColor = color;
     }
 
     private void OnColorChanged(Color old, Color curr)
     {
-        DisplayEnt.GetComponent<Image>().color = curr;
-        UpdateInfo();
         if (isOwned)
+        {
             PlayerManager.Instance.PlayerColor.color = curr;
+            PlayerManager.Instance.PlayerColor.sprite = characterPics[pictureIndex];
+        }
+        UpdateInfo();
+    }
+    private void OnIndexChanged(int old, int curr)
+    {
+        print($"Index changed {netId} from {old} to {curr}");
+        if (isOwned)
+        {
+            PlayerManager.Instance.PlayerColor.color = displayColor;
+            PlayerManager.Instance.PlayerColor.sprite = characterPics[curr];
+        }
+        
+        UpdateInfo();
     }
 
     private void ServerSideOnlyUpdateMoney(int diff)
@@ -180,27 +212,34 @@ public class Player : NetworkBehaviour
 
     public void UpdateInfo()
     {
-        infoDisplay.Display(this);
-        TilePlacer.Instance.Tiles[Position].PlacePlayer(this);
+        infoDisplay?.Display(this);
+        if (DisplayEnt != null)
+        {
+            var boardFigureImage = DisplayEnt.GetComponent<Image>();
+            boardFigureImage.sprite = characterPics[pictureIndex];
+            boardFigureImage.color = displayColor;
+        }
+
+        if (TilePlacer.Instance != null && TilePlacer.Instance.Tiles != null)
+        {
+            
+            TilePlacer.Instance.Tiles[Position].PlacePlayer(this);
+        }
+
     }
 
-    private void UpdatePlayerOwnedMoney(int difference)
+    public bool CanBuyTile(Player player, TileData tileData)
     {
-        CmdUpdateOwnedMoney(OwnedMoney + difference);
-    }
-
-    public bool CanBuyTile(TileData tileData)
-    {
-        return Position == tileData.position
-               && ownedMoney >= tileData.baseTile.cost
-               && PlayerManager.Instance.CurrentPlayer.netId == netId;
+        return player.Position == tileData.position
+               && player.ownedMoney >= tileData.baseTile.cost
+               && PlayerManager.Instance.CurrentPlayer.netId == player.netId;
     }
 
     [Command]
     public void CmdBuyTile(int tilePosition)
     {
         var data = TilePlacer.Instance.GetTileAt(tilePosition);
-        if (CanBuyTile(data))
+        if (CanBuyTile(this, data))
         {
             ownedMoney -= data.baseTile.cost;
             TilePlacer.Instance.RpcBoughtTile(data.position, netId);

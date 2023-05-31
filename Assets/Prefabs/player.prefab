@@ -68,5 +68,16 @@ MonoBehaviour:
   playerDisplay: {fileID: 5228076700145545829, guid: ee9e125b56b787843a51c8a676f86fd3, type: 3}
   infoDisplayPrefab: {fileID: 2750978041263529341, guid: e1b873f7924c77d4bbcf41f238d8214f, type: 3}
   moneyChangeSound: {fileID: 8300000, guid: b49617cf47404214e846ca5807400774, type: 3}
+  characterPics:
+  - {fileID: 21300000, guid: 6886db5fac1305b4d82a95ca744de0c7, type: 3}
+  - {fileID: 21300000, guid: c50ecf4cb0747f64487b52e59758d9a7, type: 3}
+  - {fileID: 21300000, guid: 4800731ef4eae344c85a8e9b24fb7278, type: 3}
+  - {fileID: 21300000, guid: ed8ef41e0593c444f89985400bb18768, type: 3}
+  - {fileID: 21300000, guid: be5129279b1dfca4ab4fa9ddc1c574f0, type: 3}
+  - {fileID: 21300000, guid: 679b077591a3b44429e6d0cb3b000386, type: 3}
+  - {fileID: 21300000, guid: 7d772d845fa5ada41b501fc7ba13abe8, type: 3}
+  - {fileID: 21300000, guid: e21783b9009bb3e40aac9f7487d624f7, type: 3}
+  - {fileID: 21300000, guid: 06823b49a1fcd154da0942a436195adb, type: 3}
+  - {fileID: 21300000, guid: 01f37c4d7431f454297eadac8750d509, type: 3}
   eventMove: 0
   displayColor: {r: 0, g: 0, b: 0, a: 0}

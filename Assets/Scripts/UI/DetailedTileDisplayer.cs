@@ -31,7 +31,7 @@ public class DetailedTileDisplayer : MonoBehaviour
             ownerName.alpha = 0;
             purchaseButtonText.text = "$" + baseTile.cost;
             var player = PlayerManager.Instance.OwnedPlayer;
-            purchaseButton.interactable = player.CanBuyTile(data);
+            purchaseButton.interactable = player.CanBuyTile(player, data);
         }
         else
         {
