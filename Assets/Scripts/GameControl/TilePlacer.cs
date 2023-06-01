@@ -325,7 +325,7 @@ public class TileData
     {
         this.baseTile = baseTile;
         this.position = position;
-        fee = baseTile.fee * 20;
+        fee = baseTile.fee ;
         id = Guid.NewGuid();
         isOwned = false;
         sellPrice = baseTile.cost;
@@ -333,6 +333,6 @@ public class TileData
 
     public int CalculateTilePrice()
     {
-        return (int)(((fee - baseTile.fee) * 15 + baseTile.cost) * (1 + Random.Range(-0.1f, 0.1f)));
+        return (int)(((fee - baseTile.fee) * 10 + baseTile.cost) * (1 + Random.Range(-0.1f, 0.1f)));
     }
 }

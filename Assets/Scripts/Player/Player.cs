@@ -135,7 +135,8 @@ public class Player : NetworkBehaviour
     {
         if (isOwned && !eventMove && old > current)
         {
-            CmdUpdateOwnedMoney(OwnedMoney + GlobalConstants.RoundSalary);
+            CmdCheckForCycle(old, current);
+            DepositHelper.Instance.CmdCheckForDeposit(netId);
         }
 
         print($"Placing player: {DisplayName} with id {netId} at position {current}");
@@ -166,10 +167,19 @@ public class Player : NetworkBehaviour
         position = newPos;
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdUpdateOwnedMoney(int amount)
     {
         ownedMoney = amount;
+    }
+    
+    [Command(requiresAuthority = false)]
+    private void CmdCheckForCycle(int old, int current)
+    {
+        if (isOwned && !eventMove && old > current)
+        {
+            ownedMoney += GlobalConstants.RoundSalary;
+        }
     }
 
     [Command]

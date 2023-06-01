@@ -2,6 +2,7 @@
 using System.Collections;
 using Mirror;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace GameControl.helpers
@@ -10,6 +11,7 @@ namespace GameControl.helpers
     {
         [SerializeField] private AudioClip movementSoundClip;
         [SerializeField] private AudioSource audioSource;
+        [SerializeField] private Button endTurnButton;
 
         public static PlayerMovementHelper Instance { get; private set; }
 
@@ -33,6 +35,14 @@ namespace GameControl.helpers
             }
 
             player.CmdCheckPosition();
+            RpcActivateEndTurnButton(player.netId);
+        }
+
+        [ClientRpc]
+        private void RpcActivateEndTurnButton(uint playerId)
+        {
+            if (PlayerManager.Instance.GetPlayerWithId(playerId).isOwned)
+                endTurnButton.interactable = true;
         }
 
 
@@ -66,6 +76,7 @@ namespace GameControl.helpers
             currentPlayer.UpdatePositionServerSide(
                 TilePlacer.Instance.CalculatePosition(currentPlayer.Position, dist),
                 true);
+            endTurnButton.interactable = true;
         }
 
         [Command(requiresAuthority = false)]
