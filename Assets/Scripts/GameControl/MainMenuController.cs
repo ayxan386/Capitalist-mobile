@@ -2,19 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
-    public const string VibrationKey = "Vibration";
     [SerializeField] private TMP_Dropdown servers;
-    [SerializeField] private Toggle vibrationToggle;
 
     private List<DiscoveryResponse> serversList;
 
     private IEnumerator Start()
     {
-        vibrationToggle.isOn = PlayerPrefs.HasKey(VibrationKey);
         while (true)
         {
             servers.ClearOptions();
@@ -48,12 +44,5 @@ public class MainMenuController : MonoBehaviour
 
         if (serversList.Count == 1)
             servers.RefreshShownValue();
-    }
-
-    public void OnVibrationToggle(bool val)
-    {
-        if (val)
-            PlayerPrefs.SetInt(VibrationKey, 1);
-        else PlayerPrefs.DeleteKey(VibrationKey);
     }
 }

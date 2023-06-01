@@ -81,7 +81,7 @@ namespace GameControl
             DiceRollHelper.Instance.CanRoll = player.isOwned;
             UpdateTurnIndicator();
 
-            if (player.isOwned && PlayerPrefs.HasKey(MainMenuController.VibrationKey))
+            if (player.isOwned && SettingsHelper.Instance.IsVibrationOn())
             {
                 Handheld.Vibrate();
             }
